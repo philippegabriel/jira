@@ -1,0 +1,29 @@
+/*simple css to make table more readable*/
+*{font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;}
+.bold{font-weight:bold;}
+body {font-size:100%;}
+table{border-collapse:collapse;}
+td, th {border:1px solid #98bf21;}
+tr.alt td {background-color:#EAF2D3;}
+table.noborder > tbody > tr > td {border: none;}
+table.report > tbody > tr > td{font-size:0.875em;}
+.nowrap{white-space: nowrap;}
+.button {
+font-size:1.1em;
+text-align:left;
+padding-top:5px;
+padding-bottom:4px;
+background-color:#A7C942;
+color:black;
+}
+.error{
+background-color:red;
+color:white;
+text-align:center;
+}
+.banner
+{
+text-align:center; 
+background-color:#A7C942;
+color:white;
+}
