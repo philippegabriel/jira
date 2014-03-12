@@ -51,20 +51,31 @@ close $fd;
 #abort if query contains no records
 (scalar @input != 0) or abort("Jira query returned no record",$makeout);
 #format the jira output to html
-s/^(.*?,.*?,.*?),(.*?),(.*?),(.*?)$/\1,<a href="https:\/\/jira.uk.xensource.com\/browse\/\2-\3">\2-\3<\/a>,\4/g for @input; #merge project and id fields
-s/^(.*?),(.*?),(.*?),(.*?),(.*?)$/\1<\/td><td class="nowrap">\2<\/td><td>\3<\/td><td class="nowrap">\4<\/td><td>\5/g for @input; #subsitute comma with <td> tag
-s/^(.*)$/<tr><td>\1<\/td><\/tr>/g for @input; #add <tr> tag
-my $c=0; ($c++ & 1) and s/<tr>/<tr class="alt">/ for @input; #add a class attribute
-#trim to make readable
-s/(\d\d\d\d-\d\d-\d\d).*?<\/td>/\1<\/td>/ for @input;  #remove time specs
+my @HTMLoutput;
+my $c=0;
+my $jiraquery;
+my %seen;
+foreach (@input) {
+	chomp;
+	my ($author,$date,$action,$project,$id,$comment) = split(/,/);
+	$date=~s/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d).*?$/\1/;	 #remove time
+	my $jiraissue=$project.'-'.$id;
+	my $url='<a href="https://jira.uk.xensource.com/browse/'.$jiraissue.'">'.$jiraissue.'</a>'; #setup a url to ticket
+	my $alt_tr=($c++ & 1) ? '<tr class="alt">' : '<tr>';
+	push @HTMLoutput , $alt_tr.'<td>'.$author.'</td><td class="nowrap">'.$date.'</td><td>'.$action.'</td><td class="nowrap">'.$url.'</td><td>'.$comment."</td>\n";
+	#build up jira query
+	$c ==1 and $jiraquery=$jiraissue;
+	! $seen{$jiraissue}++ and  $jiraquery=$jiraquery.','.$jiraissue;
+}
 #generate download links and output tabulated results
 print << "HTML";
-<h3 class="banner">Query result (.csv files)</h3>
+<h3 class="banner">Query results</h3>
+<a href="https://jira.uk.xensource.com/issues/?jql=%20id%20in%20($jiraquery)">View the jira issues</a>&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="$report">Download jira report (.csv)</a>&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="$ticketlist">Download ticket summary (.csv)</a>
 <h3 class="banner">Jira detailed report</h3>
 <table class="report">
-@input
+@HTMLoutput
 </table>
 HTML
 print end_html;
