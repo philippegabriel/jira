@@ -4,22 +4,24 @@
 # Plot by month, by release
 # using the jira SQL interface, see: https://developer.atlassian.com/display/JIRADEV/Database+Schema 
 #
-.PHONY: login clean genplot genpng test
+.PHONY: login clean reallyclean check test
 
 # List of all XS release 
-XSReleases="4.0.1"
-XSReleases+="4.1"
-XSReleases+="5.0"
-XSReleases+="5.5"
-XSReleases+="5.6"
-XSReleases+="6.0"
-XSReleases+="6.0.2"
-XSReleases+="6.1"
-XSReleases+="6.2"
+XSReleases=4.0.1
+XSReleases+=4.1
+XSReleases+=5.0
+XSReleases+=5.5
+XSReleases+=5.6
+XSReleases+=6.0
+XSReleases+=6.0.2
+XSReleases+=6.1
+XSReleases+=6.2
 ####################autogen variables#######################################
-plotfiles=$(addprefix XenServer.,$(addsuffix .plot, $(XSReleases)))
 jiratargets=SCTXbyDateAndRelease.csv SCTXSumByMonth.csv
-gnuplottargets=SCTXbyReleaseByMonth.png
+monthplotfiles=$(addprefix XenServer.,$(addsuffix .month.plot, $(XSReleases)))
+quarterplotfiles=$(addprefix XenServer.,$(addsuffix .quarter.plot, $(XSReleases)))
+gnuplottargets=SCTX.byRel.byMonth.png
+gnuplottargets+=SCTX.byRel.byQuarter.png
 #jira server params, read from .config file
 host=$(lastword $(shell grep 'host' .config))
 dbname=$(lastword $(shell grep 'dbname' .config))
@@ -28,13 +30,25 @@ password=$(lastword $(shell grep 'password' .config))
 ConnectToJira=psql --host=$(host) --dbname=$(dbname) --username=$(username)
 setJiraPass=export PGPASSWORD=$(password)
 ###################rules#####################################################
-all: $(jiratargets) $(plotfiles) $(gnuplottargets)
+all: $(jiratargets) $(monthplotfiles) $(quarterplotfiles) $(gnuplottargets)
 %.csv: %.sql
 	$(setJiraPass) ; $(ConnectToJira) --field-separator="," --no-align --tuples-only -f  $< > $@
-XenServer.%.plot: $(jiratargets)
-	grep  "$*" SCTXbyDateAndRelease.csv | cut -d, -f1 | uniq -c  | perl -npe 's/^\s+(\d+) (\d+)$$/\2,\1/;' > $@
-%.png: $(plotfiles)
-	gnuplot -e "filename='$@'"  script.gp
+XenServer.%.sparse.month.plot: $(jiratargets)
+	perl -ne '/XenServer $*[^\.]/ && print' SCTXbyDateAndRelease.csv | cut -d, -f1 | uniq -c | perl -npe 's/^\s+(\d+) (\d+)$$/\2,\1/;' > $@
+XenServer.%.month.plot: XenServer.%.sparse.month.plot
+	cat $< | perl sparseMonth2Month.pl > $@
+XenServer.%.quarter.plot: XenServer.%.month.plot
+	cat $< | perl month2quarter.pl > $@
+
+SCTXSum.month.plot: SCTXSumByMonth.csv
+	cat $< | perl sparseMonth2Month.pl > $@
+SCTXSum.quarter.plot: SCTXSum.month.plot
+	cat $< | perl month2quarter.pl > $@
+
+%.byQuarter.png: $(quarterplotfiles) SCTXSum.quarter.plot
+	gnuplot -e "filename='$@'"  byQuarter.gnuplot
+%.byMonth.png: $(monthplotfiles) SCTXSum.month.plot
+	gnuplot -e "filename='$@'"  byMonth.gnuplot
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 clean: 
@@ -42,8 +56,27 @@ clean:
 reallyclean: clean
 	rm -f $(jiratargets)
 ################testing######################################################
+check:
+	for i in $(XSReleases) ; do \
+	cat XenServer.$$i.sparse.month.plot | cut -d, -f2 | awk '{s+=$$1} END {print s}';\
+	cat XenServer.$$i.month.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
+	cat XenServer.$$i.quarter.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
+	done
+	cat SCTXSumByMonth.csv | cut -d, -f2 | awk '{s+=$$1} END {print s}';\
+	cat SCTXSum.month.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
+	cat SCTXSum.quarter.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
+
 test:
-	echo $(plotfiles)
+	echo rank,quarter,totalSCTX,$(XSReleases) | sed 's/ /,/g' > SCTX.byQuarter.csv
+	paste -d, SCTXSum.quarter.plot $(quarterplotfiles) | cut -d, -f1-3,6,9,12,15,18,21,24,27,30 >> SCTX.byQuarter.csv
+	echo rank,month,totalSCTX,$(XSReleases) | sed 's/ /,/g' > SCTX.byMonth.csv
+	paste -d, SCTXSum.month.plot $(monthplotfiles) | cut -d, -f1-3,6,9,12,15,18,21,24,27,30 >> SCTX.byMonth.csv
+
+
+
+
+
+
 
 
 
