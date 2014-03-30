@@ -30,7 +30,7 @@ password=$(lastword $(shell grep 'password' .config))
 ConnectToJira=psql --host=$(host) --dbname=$(dbname) --username=$(username)
 setJiraPass=export PGPASSWORD=$(password)
 ###################rules#####################################################
-all: $(jiratargets) $(monthplotfiles) $(quarterplotfiles) $(gnuplottargets)
+all: $(jiratargets) $(monthplotfiles) $(quarterplotfiles) $(gnuplottargets) SCTX.byQuarter.csv SCTX.byMonth.csv
 %.csv: %.sql
 	$(setJiraPass) ; $(ConnectToJira) --field-separator="," --no-align --tuples-only -f  $< > $@
 XenServer.%.sparse.month.plot: $(jiratargets)
@@ -44,6 +44,12 @@ SCTXSum.month.plot: SCTXSumByMonth.csv
 	cat $< | perl sparseMonth2Month.pl > $@
 SCTXSum.quarter.plot: SCTXSum.month.plot
 	cat $< | perl month2quarter.pl > $@
+%.byQuarter.csv:
+	echo rank,quarter,totalSCTX,$(XSReleases) | sed 's/ /,/g' > $@
+	paste -d, SCTXSum.quarter.plot $(quarterplotfiles) | cut -d, -f1-3,6,9,12,15,18,21,24,27,30 >> $@
+%.byMonth.csv:
+	echo rank,month,totalSCTX,$(XSReleases) | sed 's/ /,/g' > $@
+	paste -d, SCTXSum.month.plot $(monthplotfiles) | cut -d, -f1-3,6,9,12,15,18,21,24,27,30 >> $@
 
 %.byQuarter.png: $(quarterplotfiles) SCTXSum.quarter.plot
 	gnuplot -e "filename='$@'"  byQuarter.gnuplot
@@ -52,7 +58,7 @@ SCTXSum.quarter.plot: SCTXSum.month.plot
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 clean: 
-	rm -f *.plot $(gnuplottargets)
+	rm -f *.plot $(gnuplottargets)  SCTX.byQuarter.csv SCTX.byMonth.csv
 reallyclean: clean
 	rm -f $(jiratargets)
 ################testing######################################################
@@ -66,11 +72,10 @@ check:
 	cat SCTXSum.month.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
 	cat SCTXSum.quarter.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
 
+
 test:
-	echo rank,quarter,totalSCTX,$(XSReleases) | sed 's/ /,/g' > SCTX.byQuarter.csv
-	paste -d, SCTXSum.quarter.plot $(quarterplotfiles) | cut -d, -f1-3,6,9,12,15,18,21,24,27,30 >> SCTX.byQuarter.csv
-	echo rank,month,totalSCTX,$(XSReleases) | sed 's/ /,/g' > SCTX.byMonth.csv
-	paste -d, SCTXSum.month.plot $(monthplotfiles) | cut -d, -f1-3,6,9,12,15,18,21,24,27,30 >> SCTX.byMonth.csv
+	gnuplot -e "filename='test.png'"  test.gp
+	
 
 
 
