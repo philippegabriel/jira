@@ -34,8 +34,8 @@ clean:
 reallyclean: clean
 	rm -f $(targets)
 ################testing######################################################
-test: CAOutflowByDateAndRelease.csv
-
+test: 
+	gnuplot -e "outfile='test.png';infile='CAInflow.clearwater.2013.bySprint.byTeams.csv'" test.gnuplot
 
 
 
