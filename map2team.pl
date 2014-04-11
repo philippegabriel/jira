@@ -31,8 +31,8 @@ while(<STDIN>){
 	$sprintId=sprintf("%02d",$week+1 & hex '0xFFFE'); #map odd week to following even week
 #concatenate team name
 	$sprintId.=$team;
-#	print $week.','.$name.','.$issueId.','.$sprintId."\n";
 	$sprints{$sprintId}++;
+#print $year.','.$week.','.$issueId.','.$name.','.$rel.','.$sprintId.','.$team."\n"; # debug - mapping
 }
 #output final result
 print 'sprint,'.join(',',@teams)."\n";
