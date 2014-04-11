@@ -27,15 +27,17 @@ all: $(targets)
 	cat $< | grep -i $(release) | grep $(year) > $@	
 %.$(release).$(year).bySprint.byTeams.csv: %.$(release).$(year).csv
 	cat $< | perl map2team.pl teamMap.csv > $@
+%.$(release).$(year).bySprint.byTeams.png: %.$(release).$(year).bySprint.byTeams.csv
+	gnuplot -e "outfile='$@';infile='$<'" csvStackedLines.gnuplot
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 clean: 
-	rm -f *.plot 
+	rm -f *.png 
 reallyclean: clean
 	rm -f $(targets)
 ################testing######################################################
-test: 
-	gnuplot -e "outfile='test.png';infile='CAInflow.clearwater.2013.bySprint.byTeams.csv'" test.gnuplot
+test: CAInflow.clearwater.2013.bySprint.byTeams.png CAOutflow.clearwater.2013.bySprint.byTeams.png
+
 
 
 

@@ -23,7 +23,7 @@ map{my $sprintId = $_;map{$sprints{$sprintId.$_}=0}@teams}@sprints;
 #Map each issue to its team and sprint
 while(<STDIN>){
 	chomp;
-	my($year,$week,$issueId,$name,$rel)=split(/,/);
+	my($year,$week,$issueId,$priority,$name,$rel)=split(/,/);
 #map name to team
 	my $team=$map2team{$name};
 #map week to sprint
