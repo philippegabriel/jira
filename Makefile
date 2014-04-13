@@ -6,6 +6,7 @@
 # Produce "allPri" and "B+C" for 
 #
 .PHONY: login clean reallyclean check test
+.SECONDARY:
 ###################customise this section###################################
 release=clearwater
 year=2013
@@ -21,7 +22,8 @@ targets=$(allPribyTeamstargets) $(B+CbyTeamstargets)
 allPriteamtargets=$(foreach team,$(teams),CA.InOutflow.allPri.$(team).$(fnametemplate).csv)
 B+Cteamtargets=$(foreach team,$(teams),CA.InOutflow.B+C.$(team).$(fnametemplate).csv)
 teamtargets=$(allPriteamtargets) $(B+Cteamtargets)
-pngtargets=$(subst .csv,.png,$(targets) $(teamtargets))
+pngtargets=$(subst .csv,.png,$(targets))
+pngteamtargets=$(subst .csv,.png,$(teamtargets))
 ####################autogen variables#######################################
 #jira server params, read from .config file
 host=$(lastword $(shell grep 'host' .config))
@@ -31,7 +33,7 @@ password=$(lastword $(shell grep 'password' .config))
 ConnectToJira=psql --host=$(host) --dbname=$(dbname) --username=$(username)
 setJiraPass=export PGPASSWORD=$(password)
 ###################rules#####################################################
-all: $(targets) $(teamtargets) $(pngtargets)
+all: $(targets) $(teamtargets) $(pngtargets) $(pngteamtargets)
 #Fetch data from jira
 #%.byNames.allYears.allReleases.csv: %.byNames.allYears.allReleases.sql
 #	$(setJiraPass) ; $(ConnectToJira) --field-separator="," --no-align --tuples-only -f  $< > $@
@@ -56,18 +58,21 @@ $(allPriteamtargets): $(allPribyTeamstargets)
 $(B+Cteamtargets): $(B+CbyTeamstargets) 
 	perl combineInOutflow.pl "$(teams)" "$(B+Cteamtargets)" $^
 
-#Produce png files; emit warning if csv file has too few columns
-%.png: %.csv
-	gnuplot -e "outfile='$@';infile='$<'" csv2stackedLines.gnuplot > /dev/null
+#Produce png files
+$(pngtargets):
+	gnuplot -e "outfile='$@';infile='$(subst png,csv,$@)'" csv2stackedLines.gnuplot 
+$(pngteamtargets):
+	gnuplot -e "outfile='$@';infile='$(subst png,csv,$@)'" csv2lines.gnuplot 
 #############################utility##########################################
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 clean: 
-	rm -f $(targets) $(teamtargets) $(pngtargets)  
+	rm -f $(targets) $(teamtargets) $(pngtargets) $(pngteamtargets)
 reallyclean: clean
 	rm -f $(targets)
 ############################testing###########################################
-test: CA.InOutflow.B+C.r3.2013.clearwater.png
+test: CA.InOutflow.allPri.r3.2013.clearwater.png
+
 
 
 

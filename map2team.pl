@@ -21,9 +21,13 @@ my %sprints;
 map{my $sprintId = $_;map{$sprints{$sprintId.$_}=0}@teams}@sprints;
 #foreach my $key (sort keys %sprints){print "$key\n";} #debug - check %sprints hash
 #Map each issue to its team and sprint
+my %seen; #remove duplicate 
 while(<STDIN>){
 	chomp;
 	my($year,$week,$issueId,$priority,$name,$rel)=split(/,/);
+#skip issue if alreeady accounted for
+	$seen{$issueId} and next;
+	$seen{$issueId}=1;
 #map name to team
 	my $team=$map2team{$name};
 #map week to sprint

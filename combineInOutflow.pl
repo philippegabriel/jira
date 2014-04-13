@@ -9,7 +9,7 @@ open my $fd1, $inflow  or die("Couldn't open $inflow");
 open my $fd2, $outflow or die("Couldn't open $outflow");
 @inflow=<$fd1>;@outflow=<$fd2>; #buffer the files
 shift @inflow;shift @outflow; #skip first header line
-chomp @inflow;chomp @outflow; #skip first header line
+chomp @inflow;chomp @outflow; 
 close $fd1;close $fd2;
 #accumulate output in teams hash
 %teams;
@@ -20,8 +20,8 @@ foreach(@inflow){
 	$sprintID=shift @inflowRow;shift @outflowRow;
 #assign each per team column to team hash
 	foreach(@teams){
-#printf("%s,%s,%s\n",$sprintID,shift @inflowRow,shift @outflowRow); #debug output
 		$row=sprintf("%s,%s,%s\n",$sprintID,shift @inflowRow,shift @outflowRow);
+#printf $row; #debug output
 		$teams{$_}.=$row;
 	}
 }
