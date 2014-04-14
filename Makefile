@@ -33,7 +33,8 @@ password=$(lastword $(shell grep 'password' .config))
 ConnectToJira=psql --host=$(host) --dbname=$(dbname) --username=$(username)
 setJiraPass=export PGPASSWORD=$(password)
 ###################rules#####################################################
-all: $(targets) $(teamtargets) $(pngtargets) $(pngteamtargets)
+#all: $(jiratargets) $(targets) $(pngtargets) $(teamtargets) $(pngteamtargets)
+all: $(targets) $(pngtargets)
 #Fetch data from jira
 #%.byNames.allYears.allReleases.csv: %.byNames.allYears.allReleases.sql
 #	$(setJiraPass) ; $(ConnectToJira) --field-separator="," --no-align --tuples-only -f  $< > $@
@@ -71,7 +72,12 @@ clean:
 reallyclean: clean
 	rm -f $(targets)
 ############################testing###########################################
-test: CA.InOutflow.allPri.r3.2013.clearwater.png
+test: 
+	cat CA.inflow.byNames.allYears.allReleases.csv | grep -i $(release)  | perl map2team.pl .teamMap > test.csv
+	gnuplot -e "outfile='test.png';infile='test.csv';xmin='205';xmax='240';ylabel='# issues';xlabel='Sprint'" csv2stackedLines.gnuplot
+
+
+
 
 
 
