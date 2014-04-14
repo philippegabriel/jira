@@ -51,10 +51,10 @@ SCTXSum.quarter.plot: SCTXSum.month.plot
 	echo rank,month,totalSCTX,$(XSReleases) | sed 's/ /,/g' > $@
 	paste -d, SCTXSum.month.plot $(monthplotfiles) | cut -d, -f1-3,6,9,12,15,18,21,24,27,30 >> $@
 
-%.byQuarter.png: $(quarterplotfiles) SCTXSum.quarter.plot
-	gnuplot -e "filename='$@'"  byQuarter.gnuplot
-%.byMonth.png: $(monthplotfiles) SCTXSum.month.plot
-	gnuplot -e "filename='$@'"  byMonth.gnuplot
+%.byQuarter.png: %.byQuarter.csv
+	gnuplot -e "outfile='$@';infile='$<';xmin='2';xmax='25'"  csv2stackedLines.gnuplot
+%.byMonth.png: %.byMonth.csv
+	gnuplot -e "outfile='$@';infile='$<';xmin='5';xmax='75'"  csv2stackedLines.gnuplot
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 clean: 
@@ -73,9 +73,10 @@ check:
 	cat SCTXSum.quarter.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
 
 
-test:
-	gnuplot -e "filename='test.png'"  test.gp
-	
+test: SCTX.byQuarter.png SCTX.byMonth.png
+
+
+
 
 
 
