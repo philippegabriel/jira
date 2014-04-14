@@ -52,9 +52,9 @@ SCTXSum.quarter.plot: SCTXSum.month.plot
 	paste -d, SCTXSum.month.plot $(monthplotfiles) | cut -d, -f1-3,6,9,12,15,18,21,24,27,30 >> $@
 
 %.byQuarter.png: %.byQuarter.csv
-	gnuplot -e "outfile='$@';infile='$<';xmin='2';xmax='25'"  csv2stackedLines.gnuplot
+	gnuplot -e "outfile='$@';infile='$<';xmin='2';xmax='25';ylabel='# issues';xlabel='Quarter'"  csv2stackedLines.gnuplot
 %.byMonth.png: %.byMonth.csv
-	gnuplot -e "outfile='$@';infile='$<';xmin='5';xmax='75'"  csv2stackedLines.gnuplot
+	gnuplot -e "outfile='$@';infile='$<';xmin='5';xmax='75';ylabel='# issues';xlabel='Month'"  csv2stackedLines.gnuplot
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 clean: 
