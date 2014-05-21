@@ -16,11 +16,13 @@ close $fd1;close $fd2;
 foreach(@inflow){
 #map row to array of columns
 	@inflowRow=split(/,/); @outflowRow= split(/,/,shift @outflow);
-#first column is sprint id
+#first column is sprint rank
+	$sprintRank=shift @inflowRow;shift @outflowRow;
+#2nd column is sprint id
 	$sprintID=shift @inflowRow;shift @outflowRow;
 #assign each per team column to team hash
 	foreach(@teams){
-		$row=sprintf("%s,%s,%s\n",$sprintID,shift @inflowRow,shift @outflowRow);
+		$row=sprintf("%s,%s,%s,%s\n",$sprintRank,$sprintID,shift @inflowRow,shift @outflowRow);
 #printf $row; #debug output
 		$teams{$_}.=$row;
 	}
@@ -28,7 +30,7 @@ foreach(@inflow){
 foreach(@teams){
 	my $filename = shift @fnames;
 	open(my $fh, '>', $filename) or die "Could not open file '$filename' $!";
-	print $fh "sprint,inflow,outflow\n";
+	print $fh "rank,sprint,inflow,outflow\n";
 	print $fh $teams{$_};
 	close $fh;	
 }

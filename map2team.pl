@@ -42,7 +42,7 @@ while(<STDIN>){
 #print $year.','.$week.','.$issueId.','.$name.','.$rel.','.$sprintId.','.$team."\n"; # debug - mapping
 }
 #output final result
-print ',sprint,'.join(',',@teams)."\n";
+print 'rank,sprint,'.join(',',@teams)."\n";
 $i=0;
 foreach(@year){
 	$year=$_;

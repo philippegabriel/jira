@@ -1,23 +1,17 @@
 #!/usr/bin/make -f
 # philippeg apr2014
 # Fetch issues from jira using the SQL interface
+# Graph the reports, using gnuplot
 # see: https://developer.atlassian.com/display/JIRADEV/Database+Schema
-# Produce "byTeams" csv files, mapping id to team id
-# Produce "allPri" and "B+C" for 
 #
-.PHONY: login clean reallyclean check test
-.SECONDARY:
+.PHONY: login clean reallyclean check test jiraquery
 ###################customise this section###################################
 release=clearwater
-year=2013
 teams=doc partner perf qa r0 r3 sto win xc
-fnametemplate=$(year).$(release)
-jiratargets=CA.outflow.byNames.allYears.allReleases.csv
-jiratargets+=CA.inflow.byNames.allYears.allReleases.csv
-allPribyTeamstargets=CA.inflow.allPri.byTeams.$(fnametemplate).csv 
-allPribyTeamstargets+=CA.outflow.allPri.byTeams.$(fnametemplate).csv 
-B+CbyTeamstargets=CA.inflow.B+C.byTeams.$(fnametemplate).csv 
-B+CbyTeamstargets+=CA.outflow.B+C.byTeams.$(fnametemplate).csv 
+fnametemplate=allYears.$(release)
+jiratargets=CA.outflow.byNames.allYears.allReleases.csv CA.inflow.byNames.allYears.allReleases.csv
+allPribyTeamstargets=CA.inflow.allPri.byTeams.$(fnametemplate).csv CA.outflow.allPri.byTeams.$(fnametemplate).csv 
+B+CbyTeamstargets=CA.inflow.B+C.byTeams.$(fnametemplate).csv CA.outflow.B+C.byTeams.$(fnametemplate).csv 
 targets=$(allPribyTeamstargets) $(B+CbyTeamstargets)
 allPriteamtargets=$(foreach team,$(teams),CA.InOutflow.allPri.$(team).$(fnametemplate).csv)
 B+Cteamtargets=$(foreach team,$(teams),CA.InOutflow.B+C.$(team).$(fnametemplate).csv)
@@ -33,22 +27,23 @@ password=$(lastword $(shell grep 'password' .config))
 ConnectToJira=psql --host=$(host) --dbname=$(dbname) --username=$(username)
 setJiraPass=export PGPASSWORD=$(password)
 ###################rules#####################################################
-#all: $(jiratargets) $(targets) $(pngtargets) $(teamtargets) $(pngteamtargets)
-all: $(targets) $(pngtargets)
+#all: $(targets) $(pngtargets) $(teamtargets) $(pngteamtargets)
+all: $(targets) $(pngtargets) $(teamtargets) $(pngteamtargets)
+jiraquery: $(jiratargets)
 #Fetch data from jira
-#%.byNames.allYears.allReleases.csv: %.byNames.allYears.allReleases.sql
-#	$(setJiraPass) ; $(ConnectToJira) --field-separator="," --no-align --tuples-only -f  $< > $@
+%.byNames.allYears.allReleases.csv: %.byNames.allYears.allReleases.sql
+	$(setJiraPass) ; $(ConnectToJira) --field-separator="," --no-align --tuples-only -f  $< > $@
 
 #Filter by year and release
-%.allPri.byNames.$(year).$(release).csv: %.byNames.allYears.allReleases.csv
-	cat $< | grep -i $(release) | grep $(year) > $@
+%.allPri.byNames.allYears.$(release).csv: %.byNames.allYears.allReleases.csv
+	cat $< | grep -i $(release) > $@
 	
 #Filter Blocker and Critical
-%.B+C.byNames.$(year).$(release).csv: %.allPri.byNames.$(year).$(release).csv
+%.B+C.byNames.allYears.$(release).csv: %.allPri.byNames.allYears.$(release).csv
 	cat $< | grep "Blocker\|Critical" > $@
 
 #Map individual names to team names, using mapping defined in .teamMap	
-%.byTeams.$(year).$(release).csv: %.byNames.$(year).$(release).csv
+%.byTeams.allYears.$(release).csv: %.byNames.allYears.$(release).csv
 	cat $< | perl map2team.pl .teamMap > $@
 
 #Produce individual team combined inflow and outflow all priorities
@@ -61,20 +56,17 @@ $(B+Cteamtargets): $(B+CbyTeamstargets)
 
 #Produce png files
 $(pngtargets):
-	gnuplot -e "outfile='$@';infile='$(subst png,csv,$@)'" csv2stackedLines.gnuplot 
+	gnuplot -e "outfile='$@';infile='$(subst png,csv,$@)';xmin='205';xmax='240';ylabel='# issues';xlabel='Sprint'" csv2stackedLines.gnuplot 
 $(pngteamtargets):
-	gnuplot -e "outfile='$@';infile='$(subst png,csv,$@)'" csv2lines.gnuplot 
+	gnuplot -e "outfile='$@';infile='$(subst png,csv,$@)';xmin='205';xmax='240';ylabel='# issues';xlabel='Sprint'" csv2lines.gnuplot 
 #############################utility##########################################
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 clean: 
 	rm -f $(targets) $(teamtargets) $(pngtargets) $(pngteamtargets)
 reallyclean: clean
-	rm -f $(targets)
-############################testing###########################################
-test: 
-	cat CA.inflow.byNames.allYears.allReleases.csv | grep -i $(release)  | perl map2team.pl .teamMap > test.csv
-	gnuplot -e "outfile='test.png';infile='test.csv';xmin='205';xmax='240';ylabel='# issues';xlabel='Sprint'" csv2stackedLines.gnuplot
+	rm -f *.csv *.png
+
 
 
 
