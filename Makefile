@@ -4,21 +4,32 @@
 # Graph the reports, using gnuplot
 # see: https://developer.atlassian.com/display/JIRADEV/Database+Schema
 #
-.PHONY: login clean reallyclean check test jiraquery
+.PHONY: mkdir login clean reallyclean check test jiraquery
 ###################customise this section###################################
-release=clearwater
+#release info
+#release=clearwater
+release=tampa
+#xmin and xmax define the interval plotted from the csv file
+clearwater.xminrange=205
+clearwater.xmaxrange=242
+tampa.xminrange=170
+tampa.xmaxrange=242
+#teams info
 teams=doc partner perf qa r0 r3 sto win xc
-fnametemplate=allYears.$(release)
-jiratargets=CA.outflow.byNames.allYears.allReleases.csv CA.inflow.byNames.allYears.allReleases.csv
-allPribyTeamstargets=CA.inflow.allPri.byTeams.$(fnametemplate).csv CA.outflow.allPri.byTeams.$(fnametemplate).csv 
-B+CbyTeamstargets=CA.inflow.B+C.byTeams.$(fnametemplate).csv CA.outflow.B+C.byTeams.$(fnametemplate).csv 
-targets=$(allPribyTeamstargets) $(B+CbyTeamstargets)
-allPriteamtargets=$(foreach team,$(teams),CA.InOutflow.allPri.$(team).$(fnametemplate).csv)
-B+Cteamtargets=$(foreach team,$(teams),CA.InOutflow.B+C.$(team).$(fnametemplate).csv)
-teamtargets=$(allPriteamtargets) $(B+Cteamtargets)
-pngtargets=$(subst .csv,.png,$(targets))
-pngteamtargets=$(subst .csv,.png,$(teamtargets))
 ####################autogen variables#######################################
+jiratargets=CA.outflow.byNames.allReleases.csv CA.inflow.byNames.allReleases.csv
+#All teams target files
+allPribyTeamstargets=csv/CA.inflow.allPri.byTeams.$(release).csv csv/CA.outflow.allPri.byTeams.$(release).csv 
+B+CbyTeamstargets=csv/CA.inflow.B+C.byTeams.$(release).csv csv/CA.outflow.B+C.byTeams.$(release).csv 
+targets=$(allPribyTeamstargets) $(B+CbyTeamstargets)
+pngtargets=$(subst csv,png,$(targets))
+#Individual teams target files
+allPriteamtargets=$(foreach team,$(teams),csv/CA.InOutflow.allPri.$(team).$(release).csv)
+B+Cteamtargets=$(foreach team,$(teams),csv/CA.InOutflow.B+C.$(team).$(release).csv)
+teamtargets=$(allPriteamtargets) $(B+Cteamtargets)
+pngteamtargets=$(subst csv,png,$(teamtargets))
+#thumbnails
+thumbnails=$(subst .png,.thumb.png,$(subst png/,thumb/,$(pngtargets) $(pngteamtargets)))
 #jira server params, read from .config file
 host=$(lastword $(shell grep 'host' .config))
 dbname=$(lastword $(shell grep 'dbname' .config))
@@ -28,22 +39,24 @@ ConnectToJira=psql --host=$(host) --dbname=$(dbname) --username=$(username)
 setJiraPass=export PGPASSWORD=$(password)
 ###################rules#####################################################
 #all: $(targets) $(pngtargets) $(teamtargets) $(pngteamtargets)
-all: $(targets) $(pngtargets) $(teamtargets) $(pngteamtargets)
+all: mkdir $(targets) $(pngtargets) $(teamtargets) $(pngteamtargets) $(thumbnails)
 jiraquery: $(jiratargets)
+mkdir:
+	mkdir -p csv/ png/ thumb/
 #Fetch data from jira
-%.byNames.allYears.allReleases.csv: %.byNames.allYears.allReleases.sql
+%.byNames.allReleases.csv: %.byNames.allReleases.sql
 	$(setJiraPass) ; $(ConnectToJira) --field-separator="," --no-align --tuples-only -f  $< > $@
 
-#Filter by year and release
-%.allPri.byNames.allYears.$(release).csv: %.byNames.allYears.allReleases.csv
-	cat $< | grep -i $(release) > $@
+#Filter by release
+csv/%.allPri.byNames.$(release).csv: %.byNames.allReleases.csv
+	cat $< | grep -i $(release) | grep -i --invert-match "$(release) outgoing" > $@
 	
 #Filter Blocker and Critical
-%.B+C.byNames.allYears.$(release).csv: %.allPri.byNames.allYears.$(release).csv
+%.B+C.byNames.$(release).csv: %.allPri.byNames.$(release).csv
 	cat $< | grep "Blocker\|Critical" > $@
 
 #Map individual names to team names, using mapping defined in .teamMap	
-%.byTeams.allYears.$(release).csv: %.byNames.allYears.$(release).csv
+%.byTeams.$(release).csv: %.byNames.$(release).csv
 	cat $< | perl map2team.pl .teamMap > $@
 
 #Produce individual team combined inflow and outflow all priorities
@@ -55,17 +68,22 @@ $(B+Cteamtargets): $(B+CbyTeamstargets)
 	perl combineInOutflow.pl "$(teams)" "$(B+Cteamtargets)" $^
 
 #Produce png files
-$(pngtargets):
-	gnuplot -e "outfile='$@';infile='$(subst png,csv,$@)';xmin='205';xmax='240';ylabel='# issues';xlabel='Sprint'" csv2stackedLines.gnuplot 
-$(pngteamtargets):
-	gnuplot -e "outfile='$@';infile='$(subst png,csv,$@)';xmin='205';xmax='240';ylabel='# issues';xlabel='Sprint'" csv2lines.gnuplot 
+png/%.byTeams.$(release).png: csv/%.byTeams.$(release).csv
+	gnuplot -e "outfile='$@';infile='$<';title='$(@F)';ylabel='issues';xlabel='sprints';\
+		xmin='$($(release).xminrange)';xmax='$($(release).xmaxrange)'" csv2stackedLines.gnuplot 
+
+png/%.$(release).png: csv/%.$(release).csv
+	gnuplot -e "outfile='$@';infile='$<';title='$(@F)';ylabel='issues';xlabel='sprints';\
+		xmin='$($(release).xminrange)';xmax='$($(release).xmaxrange)'" csv2lines.gnuplot 
+thumb/%.thumb.png: png/%.png
+	convert $< -thumbnail x200 $@
 #############################utility##########################################
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 clean: 
-	rm -f $(targets) $(teamtargets) $(pngtargets) $(pngteamtargets)
+	rm -f  png/* csv/* thumb/*
 reallyclean: clean
-	rm -f *.csv *.png
+	rm -f *.csv
 
 
 

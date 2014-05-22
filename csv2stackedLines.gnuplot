@@ -1,5 +1,5 @@
 set terminal png size 1200, 800
-set title infile
+set title title
 set ylabel ylabel
 set xlabel xlabel
 set datafile separator ","
