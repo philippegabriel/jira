@@ -1,15 +1,20 @@
---
--- list jira 'PROJECT' between STARTDATE and ENDDATE where 'Affect Version' matches a given version
+-- list jira issues for the a given project
 -- Using the jira SQL interface, see: https://developer.atlassian.com/display/JIRADEV/Database+Schema
--- philippeg 10apr2014
+-- Using OUTER JOIN, see: https://confluence.atlassian.com/display/JIRA041/Example+SQL+queries+for+JIRA
+-- philippeg 30may2014
 --
-select to_char(jiraissue.created, 'YYYY'),to_char(jiraissue.created, 'WW'),concat(project.pkey,'-',jiraissue.issuenum),priority.pname,jiraissue.assignee,projectversion.vname
-from  jiraissue,project,nodeassociation,projectversion,priority
-where jiraissue.project=project.id and project.pkey='CA'
-and projectversion.id=nodeassociation.SINK_NODE_ID
-and nodeassociation.ASSOCIATION_TYPE='IssueVersion'
-and nodeassociation.SOURCE_NODE_ID=jiraissue.id
-and priority.id=jiraissue.priority
-order by jiraissue.created;
+select to_char(j.created, 'YYYY'),to_char(j.created, 'WW'),concat(p.pkey,'-',j.issuenum),pri.pname,j.assignee,pv.vname
+from  jiraissue j 
+LEFT OUTER JOIN project p ON 
+	p.pkey='CA' 
+LEFT OUTER JOIN nodeassociation naver ON 
+	naver.ASSOCIATION_TYPE='IssueVersion'
+	and naver.SOURCE_NODE_ID=j.id
+LEFT OUTER JOIN projectversion pv ON
+	pv.id=naver.SINK_NODE_ID
+LEFT OUTER JOIN priority pri ON
+	pri.id=j.priority
 
+where j.project=p.id
+order by j.created;
 
