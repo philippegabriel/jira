@@ -4,8 +4,7 @@
 # Plot by month, by release
 # using the jira SQL interface, see: https://developer.atlassian.com/display/JIRADEV/Database+Schema 
 #
-.PHONY: login clean reallyclean check test
-
+.PHONY: login jiraquery clean reallyclean check test
 # List of all XS release 
 XSReleases=4.0.1
 XSReleases+=4.1
@@ -20,8 +19,8 @@ XSReleases+=6.2
 jiratargets=SCTXbyDateAndRelease.csv SCTXSumByMonth.csv
 monthplotfiles=$(addprefix XenServer.,$(addsuffix .month.plot, $(XSReleases)))
 quarterplotfiles=$(addprefix XenServer.,$(addsuffix .quarter.plot, $(XSReleases)))
-gnuplottargets=SCTX.byRel.byMonth.png
-gnuplottargets+=SCTX.byRel.byQuarter.png
+gnuplottargets=SCTX.byQuarter.png
+gnuplottargets+=SCTX.byMonth.png
 #jira server params, read from .config file
 host=$(lastword $(shell grep 'host' .config))
 dbname=$(lastword $(shell grep 'dbname' .config))
@@ -30,7 +29,8 @@ password=$(lastword $(shell grep 'password' .config))
 ConnectToJira=psql --host=$(host) --dbname=$(dbname) --username=$(username)
 setJiraPass=export PGPASSWORD=$(password)
 ###################rules#####################################################
-all: $(jiratargets) $(monthplotfiles) $(quarterplotfiles) $(gnuplottargets) SCTX.byQuarter.csv SCTX.byMonth.csv
+all: $(monthplotfiles) $(quarterplotfiles) SCTXSum.month.plot SCTXSum.quarter.plot SCTX.byQuarter.csv SCTX.byMonth.csv $(gnuplottargets) 
+jiraquery: $(jiratargets)
 %.csv: %.sql
 	$(setJiraPass) ; $(ConnectToJira) --field-separator="," --no-align --tuples-only -f  $< > $@
 XenServer.%.sparse.month.plot: $(jiratargets)
@@ -52,9 +52,9 @@ SCTXSum.quarter.plot: SCTXSum.month.plot
 	paste -d, SCTXSum.month.plot $(monthplotfiles) | cut -d, -f1-3,6,9,12,15,18,21,24,27,30 >> $@
 
 %.byQuarter.png: %.byQuarter.csv
-	gnuplot -e "outfile='$@';infile='$<';xmin='2';xmax='25';ylabel='# issues';xlabel='Quarter'"  csv2stackedLines.gnuplot
+	gnuplot -e "title='XenServer LCM Quarterly';outfile='$@';infile='$<';xmin='2';xmax='25';ylabel='# issues';xlabel='Quarter'"  csv2stackedLines.gnuplot
 %.byMonth.png: %.byMonth.csv
-	gnuplot -e "outfile='$@';infile='$<';xmin='5';xmax='75';ylabel='# issues';xlabel='Month'"  csv2stackedLines.gnuplot
+	gnuplot -e "title='XenServer LCM Monthly';outfile='$@';infile='$<';xmin='5';xmax='75';ylabel='# issues';xlabel='Month'"  csv2stackedLines.gnuplot
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 clean: 
@@ -62,18 +62,8 @@ clean:
 reallyclean: clean
 	rm -f $(jiratargets)
 ################testing######################################################
-check:
-	for i in $(XSReleases) ; do \
-	cat XenServer.$$i.sparse.month.plot | cut -d, -f2 | awk '{s+=$$1} END {print s}';\
-	cat XenServer.$$i.month.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
-	cat XenServer.$$i.quarter.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
-	done
-	cat SCTXSumByMonth.csv | cut -d, -f2 | awk '{s+=$$1} END {print s}';\
-	cat SCTXSum.month.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
-	cat SCTXSum.quarter.plot | cut -d, -f3 | awk '{s+=$$1} END {print s}';\
+test: test.csv
 
-
-test: SCTX.byQuarter.png SCTX.byMonth.png
 
 
 

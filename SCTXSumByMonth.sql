@@ -3,13 +3,16 @@
 -- Using the jira SQL interface, see: https://developer.atlassian.com/display/JIRADEV/Database+Schema
 -- philippeg 24Mar2014
 --
-select to_char(jiraissue.created, 'YYYYmm'),count(jiraissue.issuenum)
-from  jiraissue,project,nodeassociation,projectversion
-where jiraissue.project=project.id and project.pkey='SCTX'
-and projectversion.id=nodeassociation.SINK_NODE_ID
-and nodeassociation.ASSOCIATION_TYPE='IssueVersion'
-and nodeassociation.SOURCE_NODE_ID=jiraissue.id
-group by to_char(jiraissue.created, 'YYYYmm')
-order by to_char(jiraissue.created, 'YYYYmm');
-
+select to_char(j.created, 'YYYYmm'),count(j.issuenum)
+from  jiraissue j 
+LEFT OUTER JOIN project p ON 
+	p.pkey='SCTX' 
+LEFT OUTER JOIN nodeassociation naver ON 
+	naver.ASSOCIATION_TYPE='IssueVersion'
+	and naver.SOURCE_NODE_ID=j.id
+LEFT OUTER JOIN projectversion pv ON
+	pv.id=naver.SINK_NODE_ID
+where j.project=p.id
+group by to_char(j.created, 'YYYYmm')
+order by to_char(j.created, 'YYYYmm');
 
