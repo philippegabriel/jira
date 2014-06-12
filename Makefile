@@ -29,9 +29,11 @@ SCTX.byQuarter.csv: SCTX.byMonth.csv
 	./month2quarter.pl < $< > $@
 
 %.byQuarter.png: %.byQuarter.csv
-	gnuplot -e "title='XenServer LCM Quarterly';outfile='$@';infile='$<';xmin='2';xmax='25';ylabel='# issues';xlabel='Quarter'"  csv2stackedLines.gnuplot
+	gnuplot -e "title='XenServer LCM Quarterly';outfile='$@';infile='$<';xmin='2';xmax='26';ylabel='# issues';xlabel='Quarter'"  csv2stackedLines.gnuplot
 %.byMonth.png: %.byMonth.csv
-	gnuplot -e "title='XenServer LCM Monthly';outfile='$@';infile='$<';xmin='5';xmax='75';ylabel='# issues';xlabel='Month'"  csv2stackedLines.gnuplot
+	gnuplot -e "title='XenServer LCM Monthly';outfile='$@';infile='$<';xmin='5';xmax='78';ylabel='# issues';xlabel='Month'"  csv2stackedLines.gnuplot
+%.thumb.png: %.png
+	convert $< -thumbnail x200 $@
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 clean: 
