@@ -8,18 +8,18 @@
 
 ##########################customise this section###############################################
 #start date: yyyy-mm-dd 
-startdate=2013-06-01
+startdate=2014-06-09
 #end date: yyyy-mm-dd 
-enddate=2014-01-01
+enddate=2014-06-12
 #jira projects, e.g. CA, CP, SCTX... 
-projects=SCTX,CA
+projects=CA
 #Set of people for report
-names=johnel,simonbe
-#r3=akshayr,jeromem,jonathanlu,johnel,mikemc,ravip,robho,siddharthv,simonbe,thomassa
+r3=akshayr,jonathanlu,johnel,ravip,robho,simonbe,thomassa,euanh,philippeg,\#ring-3\ defect\ coordinator
 #storage team
 #sto=andreil,chandrikas,germanop,keithpe,thanosm,vineetht,zhengl 
 #windows team
 #win=bench,owensm,pauldu 
+names=$(r3)
 ########################end of custom section##################################################
 #jira server params, read from .config file
 host=$(lastword $(shell grep 'host' .config))
@@ -34,7 +34,8 @@ setJiraPass=export PGPASSWORD=$(password)
 suffix=$(names).$(projects).from.$(startdate).to.$(enddate)
 namesPsqlFormat=$(shell echo $(names) | sed "s/\([^,]*\)/'\1'/g")
 projectsPsqlFormat=$(shell echo $(projects) | sed "s/\([^,]*\)/'\1'/g")
-targets=commentsHistory.$(suffix).csv assignedHistory.$(suffix).csv
+targets=commentsHistory.$(suffix).csv assignedHistory.$(suffix).csv 
+targets+=statusHistory.$(suffix).csv priorityHistory.$(suffix).csv 
 report=jira.report.$(suffix).csv
 ticketlist=jira.ticketlist.$(suffix).csv
 ###############################################################################################
@@ -61,7 +62,17 @@ dotar:
 	rm -f archive.*
 	tar -cjf archive.tar ./*
 test:
-	echo "$(targets)"
+	$(setJiraPass) ; $(ConnectToJira) \
+	--field-separator="," --no-align --tuples-only \
+	--variable=STARTDATE=$(startdate) --variable=ENDDATE=$(enddate) \
+	--variable=NAMES="$(namesPsqlFormat)" --variable=PROJECTS="$(projectsPsqlFormat)" \
+	-f statusHistory.sql 
+#> priorityHistory.csv
+
+
+
+
+
 
 
 
