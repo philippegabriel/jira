@@ -1,0 +1,30 @@
+<HTML>
+<head>
+<title>Jira Historical Ticket Query</title>
+<link rel="stylesheet" type="text/css" href="query.css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+</head>
+
+<BODY>
+<h2 class="banner">Jira Historical Ticket Query</h2>
+<p style="text-align:center;">
+Retrieve a set of Jira tickets that were assigned or commented on by a set of people, between 2 given dates.</br>
+Jira is queried through the <a href="https://developer.atlassian.com/display/JIRADEV/Database+Schema">Jira database SQL interface</a></br>
+</p>
+<h3 class="banner">Fill in the Jira query parameters</h3>
+
+<FORM ACTION="/jirasql/query.cgi" METHOD="POST">
+<table cellspacing="0" cellpadding="0" class="noborder">
+	<tr><td  class="bold">Citrite Id(s) (separated by ,)</td><td><INPUT TYPE="TEXT" NAME="names" size="150"></td></tr>
+	<tr><td  class="bold">Jira project(s) e.g. (CA,SCTX...)</td>	<td><INPUT TYPE="TEXT" NAME="projects" size="35"></td></tr>
+	<tr><td  class="bold">Start Date (yyyy-mm-dd)</td>	<td><INPUT TYPE="TEXT" NAME="startdate" size="10"></td></tr>
+	<tr><td  class="bold">End Date   (yyyy-mm-dd)</td>	<td><INPUT TYPE="TEXT" NAME="enddate" size="10"></td></tr>
+</table>
+<br>
+<INPUT TYPE="SUBMIT" VALUE="Submit Jira Query" class="button">
+<hr>
+<a href="https://github.com/philippegabriel/jirasql">Fetch the code on github</a>
+</FORM>
+</BODY>
+</HTML>
+
