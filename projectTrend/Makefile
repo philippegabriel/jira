@@ -7,7 +7,7 @@
 .PHONY: login clean reallyclean deploy test 
 include ../jira.mk
 ##########################customise this section###############################################
-team=xs-ring0
+team=xs-ring0,xs-ring3,xs-storage,xs-gui,xs-perf,xs-window
 IssueVersion=Creedence
 FixVersion=Creedence Outgoing
 startDate=2014-04-01 00:00:00
@@ -24,8 +24,10 @@ params=--field-separator="," --no-align --tuples-only
 params+= --variable=TEAM="$(call qw,$(team))" --variable=PROJECTS="'CA'"
 params+= --variable=RELIN="$(IssueVersion)" --variable=RELEXCL="$(FixVersion)"
 params+= --variable=STATUS="'Resolved','Closed'" --variable=STARTDATE="'$(startDate)'"
+#autogen vars
+startWk:=$(shell date --date="$(startDate)" +"%V")
 ###############################################################################################
-all: $(inflowCSV) $(outflowCSV) $(inflowByPriority) $(outflowByPriority) $(report)
+all: $(inflowCSV) $(outflowCSV) $(inflowByPriority) $(outflowByPriority) $(report) $(team).trend.csv
 
 $(team).Blocker,Critical.inflow.csv: $(inflowCSV)
 	grep -P --no-filename '^.*?,.*?,.\+,.*?,(Critical|Blocker),' $^ > /tmp/raw.$@
@@ -43,46 +45,50 @@ $(team).Major.outflow.csv: $(outflowCSV)
 	sort -r /tmp/raw.$@ | ./rmdupOut.pl /tmp/inflowmap.$@ >  $@
 
 $(team).%.report.csv: $(team).%.inflow.csv $(team).%.outflow.csv
-	@echo 'Generating report...'
-	@echo 'Team: $(team)'							| tee -a  $@
-	@echo 'Release: $(IssueVersion)'				| tee -a  $@
-	@echo 'Priority: $(priority)'					| tee -a  $@
-	@echo 											| tee -a  $@
-	@echo 'C+ Created                    R- Issue Resolved'			| tee -a  $@
-	@echo 'V+ Version set to project     V- Issue set to outgoing'	| tee -a  $@
-	@echo 'P+ Priority promoted          P- Priority demoted'		| tee -a  $@
-	@echo 'T+ Team affected              T- Team not affected'		| tee -a  $@
-	@echo 'O+ Issue Reopened'						| tee -a  $@
-	@echo 											| tee -a  $@
-	@cat $^ | sort -r | tee -a  $@
+	@echo "Generating report $@..."
+	date "+Report generated: %m %b %Y %R %ywk%V"	>  $@
+	@echo 'Team: $(team)'							>>  $@
+	@echo 'Release: $(IssueVersion)'				>>  $@
+	@echo 'Priority: $(priority)'					>>  $@
+	@echo 											>>  $@
+	@echo 'C+ Created                    R- Issue Resolved'			>>  $@
+	@echo 'V+ Version set to project     V- Issue set to outgoing'	>>  $@
+	@echo 'P+ Priority promoted          P- Priority demoted'		>>  $@
+	@echo 'T+ Team affected              T- Team not affected'		>>  $@
+	@echo 'O+ Issue Reopened'						>>  $@
+	@echo 											>>  $@
+	@cat $^ | sort -r >>  $@
+$(team).trend.csv: $(report)
+	./genstats.pl --startweek $(startWk) --team $(team) > $@
 clean: 
-	rm -f *.report.csv report.csv *inflow.csv *outflow.csv
+	rm -f *.report.csv report.csv *inflow.csv *outflow.csv *.trend.csv trend.csv
 reallyclean:
 	rm -f *.csv
 $(team).BC.P+.csv: P+.sql
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Blocker','Critical'" --variable=LOG="P+" \
-	-f $< | uniq | tee   $@
+	-f $< | uniq >   $@
 $(team).M.P+.csv: P+.sql
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Major'" --variable=LOG="P+" \
-	-f $< | uniq | tee   $@
+	-f $< | uniq >   $@
 $(team).BC.P-.csv: P-.sql
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Blocker','Critical'"	--variable=LOG="P-" \
-	-f $< | uniq | tee   $@
+	-f $< | uniq >   $@
 $(team).M.P-.csv: P-.sql
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Major'" --variable=LOG="P-" \
-	-f $< | uniq | tee   $@
+	-f $< | uniq >   $@
 $(team).%.csv: %.sql
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Blocker','Critical','Major'" --variable=LOG="$*" \
-	-f $< | uniq | tee   $@
+	-f $< | uniq >   $@
 deploy:
-	cp -f *report.csv $(deployTarget)/csv/
+	cp -f *report.csv trend.csv $(deployTarget)/csv/
 	cp -f index.html $(deployTarget)/
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 test:
+	@echo $(startWk)
 
