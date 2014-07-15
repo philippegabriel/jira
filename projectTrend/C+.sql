@@ -1,3 +1,10 @@
+--
+-- list jira issues created for a given IssueVersion and matching a given project, priority, team, start date
+-- Using the jira SQL interface, ref:
+-- https://developer.atlassian.com/display/JIRADEV/Database+Schema
+-- https://confluence.atlassian.com/display/JIRA041/Example+SQL+queries+for+JIRA
+-- philippeg jul2014
+--
 select to_char(j.created, 'YYYY-MM-DD","YY"wk"IW'),:'LOG',concat(project.pkey,'-',j.issuenum),priority.pname,j.assignee
 from  jiraissue j,project,issuetype,priority
 where j.project=project.id and project.pkey in (:PROJECTS)

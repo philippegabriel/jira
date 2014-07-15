@@ -1,3 +1,10 @@
+--
+-- list jira issues where a team is no longer affected for a given IssueVersion,project, priority, team, start date
+-- Using the jira SQL interface, ref:
+-- https://developer.atlassian.com/display/JIRADEV/Database+Schema
+-- https://confluence.atlassian.com/display/JIRA041/Example+SQL+queries+for+JIRA
+-- philippeg jul2014
+--
 select to_char(changegroup.created, 'YYYY-MM-DD","YY"wk"IW'),:'LOG',concat(project.pkey,'-',j.issuenum),priority.pname,j.assignee,concat(changeitem.oldstring,'->',changeitem.newstring)
 from  jiraissue j,project,changeitem,changegroup,priority,issuetype
 where j.project=project.id and project.pkey in (:PROJECTS)
