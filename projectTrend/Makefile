@@ -7,7 +7,7 @@
 .PHONY: login clean reallyclean deploy test 
 include ../jira.mk
 ##########################customise this section###############################################
-team=xs-ring0,xs-ring3,xs-storage,xs-gui,xs-perf,xs-window
+team=xs-nanjing
 IssueVersion=Creedence
 FixVersion=Creedence Outgoing
 startDate=2014-04-01 00:00:00
