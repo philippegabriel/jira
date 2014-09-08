@@ -7,7 +7,7 @@
 .PHONY: login clean reallyclean deploy test 
 include ../jira.mk
 ##########################customise this section###############################################
-team=xs-nanjing
+team=xs-ns
 IssueVersion=Creedence
 FixVersion=Creedence Outgoing
 startDate=2014-04-01 00:00:00
@@ -40,9 +40,12 @@ $(team).Major.inflow.csv: $(inflowCSV)
 	sort -r /tmp/raw.$@ | ./rmdupIn.pl	>  $@
 $(team).Major.outflow.csv: $(outflowCSV)
 	grep -P --no-filename '^.*?,.*?,.\-,.*?,Major,' $^ > /tmp/raw.$@
-	grep ',P+,' $(team).Blocker,Critical.inflow.csv > /tmp/inflowmap.$@ 
+	grep ',P+,' $(team).Blocker,Critical.inflow.csv > /tmp/inflowmap.$@ || true
 	cat  $(team).Major.inflow.csv >> /tmp/inflowmap.$@ 
 	sort -r /tmp/raw.$@ | ./rmdupOut.pl /tmp/inflowmap.$@ >  $@
+
+#$(team).Major.outflow.csv: $(outflowCSV)
+#	grep ',P+,' $(team).Blocker,Critical.inflow.csv > /tmp/inflowmap.$@ || true
 
 $(team).%.report.csv: $(team).%.inflow.csv $(team).%.outflow.csv
 	@echo "Generating report $@..."
