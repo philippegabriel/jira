@@ -28,10 +28,11 @@ SCTX.byMonth.csv: SCTXbyDateAndRelease.csv
 SCTX.byQuarter.csv: SCTX.byMonth.csv	
 	./month2quarter.pl < $< > $@
 
+#to update the graph up to the latest date, change the xmax label below
 %.byQuarter.png: %.byQuarter.csv
 	gnuplot -e "title='XenServer LCM Quarterly';outfile='$@';infile='$<';xmin='2';xmax='26';ylabel='# issues';xlabel='Quarter'"  csv2stackedLines.gnuplot
 %.byMonth.png: %.byMonth.csv
-	gnuplot -e "title='XenServer LCM Monthly';outfile='$@';infile='$<';xmin='5';xmax='78';ylabel='# issues';xlabel='Month'"  csv2stackedLines.gnuplot
+	gnuplot -e "title='XenServer LCM Monthly';outfile='$@';infile='$<';xmin='5';xmax='80';ylabel='# issues';xlabel='Month'"  csv2stackedLines.gnuplot
 %.thumb.png: %.png
 	convert $< -thumbnail x200 $@
 login:
