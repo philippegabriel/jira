@@ -60,7 +60,7 @@ foreach (@input) {
 	my ($author,$date,$action,$project,$id,$comment) = split(/,/);
 	$date=~s/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d).*?$/\1/;	 #remove time
 	my $jiraissue=$project.'-'.$id;
-	my $url='<a href="https://jira.uk.xensource.com/browse/'.$jiraissue.'">'.$jiraissue.'</a>'; #setup a url to ticket
+	my $url='<a href="https://issues.citrite.net/browse/'.$jiraissue.'">'.$jiraissue.'</a>'; #setup a url to ticket
 	my $alt_tr=($c++ & 1) ? '<tr class="alt">' : '<tr>';
 	push @HTMLoutput , $alt_tr.'<td>'.$author.'</td><td class="nowrap">'.$date.'</td><td>'.$action.'</td><td class="nowrap">'.$url.'</td><td>'.$comment."</td>\n";
 	#build up jira query
@@ -70,7 +70,7 @@ foreach (@input) {
 #generate download links and output tabulated results
 print << "HTML";
 <h3 class="banner">Query results</h3>
-<a href="https://jira.uk.xensource.com/issues/?jql=%20id%20in%20($jiraquery)">View the jira issues</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://issues.citrite.net/issues/?jql=%20id%20in%20($jiraquery)">View the jira issues</a>&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="$report">Download jira report (.csv)</a>&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="$ticketlist">Download ticket summary (.csv)</a>
 <h3 class="banner">Jira detailed report</h3>
