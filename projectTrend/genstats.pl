@@ -6,17 +6,34 @@ GetOptions("startweek=s" => \$startwk,"team=s" => \$team);
 $startwk eq '' and die("ERROR:missing argument --startweek");
 $team eq '' and die("ERROR:missing argument --team");
 
+#Parse start date
+$startwk=~ /(\d\d)wk(\d\d)/;
+$startYear=$1;
+$startWeekNumber=$2;
+print $startYear,$startWeekNumber,"\n"; 
 
 #Find current date, see http://en.wikipedia.org/wiki/Date_(Unix)
-$YearNow = strftime "%y", localtime;
-$wkNow = strftime "%V", localtime;
+$endwk = strftime "%ywk%V", localtime;
+print '>'.$endwk.'<',"\n";
 
-$year=$YearNow; #assumes the project doesn't span accross years
-$endwk=$wkNow;
+$startwk gt $endwk and die("Starting week: $startwk must be in the past");
+
+$i=$startYear; $j=$startWeekNumber;
+do{
+	$k=sprintf("%02d", $i).'wk'.sprintf("%02d", $j);
+	push (@wk , $k);
+	++$j;
+	if($j == 53)
+		{$j=1;++$i;}
+	}while($k  ne  $endwk);
+#map{print $_.','}@wk;
+#print "\n";
+exit 0;
+#$year=$YearNow; #assumes the project doesn't span accross years
 
 #Build an array of weeks 
-@wk=map{$year.'wk'.$_} ($startwk..$endwk);
-$startwkTag=$year.'wk'.$startwk;
+#@wk=map{$year.'wk'.$_} ($startwk..$endwk);
+#$startwkTag=$year.'wk'.$startwk;
 @pri =('Blocker,Critical','Major');
 @inflowCat=qw(C+ V+ P+ T+ O+);
 @outflowCat=qw(R- V- P- T-);
