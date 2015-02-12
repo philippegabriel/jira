@@ -5,7 +5,7 @@
 IssueVersion=Dundee
 ExcludeVersion=TTTTTTT
 startDate=2014-11-03
-teams="xs-ring0 xs-ring3 xs-storage xs-gui xs-perf xs-windows xs-partner xs-nanjing xs-ns"
+teams="xs-ring0 xs-ring3 xs-datapath xs-storage xs-gui xs-perf xs-windows xs-partner xs-nanjing xs-ns"
 for team in $teams
 do
 	make team=$team IssueVersion=$IssueVersion ExcludeVersion=$ExcludeVersion startDate=$startDate 
@@ -13,7 +13,7 @@ done
 #
 # Exec global SQL query
 #
-allteam='xs-ring0,xs-ring3,xs-storage,xs-gui,xs-perf,xs-windows,xs-partner,xs-nanjing,xs-ns'
+allteam='xs-ring0,xs-ring3,xs-datapath,xs-storage,xs-gui,xs-perf,xs-windows,xs-partner,xs-nanjing,xs-ns'
 make team=$allteam IssueVersion=$IssueVersion ExcludeVersion=$ExcludeVersion startDate=$startDate
 #
 #Generate stats
