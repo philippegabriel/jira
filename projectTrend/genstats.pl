@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use POSIX qw(strftime);
 use Getopt::Long;
+$debug=0;
 
 GetOptions("startweek=s" => \$startwk,"team=s" => \$team);
 $startwk eq '' and die("ERROR:missing argument --startweek");
@@ -10,25 +11,25 @@ $team eq '' and die("ERROR:missing argument --team");
 $startwk=~ /(\d\d)wk(\d\d)/;
 $startYear=$1;
 $startWeekNumber=$2;
-print $startYear,$startWeekNumber,"\n"; 
+$debug and print $startYear,$startWeekNumber,"\n"; 
 
 #Find current date, see http://en.wikipedia.org/wiki/Date_(Unix)
 $endwk = strftime "%ywk%V", localtime;
-print '>'.$endwk.'<',"\n";
+$debug and print '>'.$endwk.'<',"\n";
 
 $startwk gt $endwk and die("Starting week: $startwk must be in the past");
 
 $i=$startYear; $j=$startWeekNumber;
-do{
-	$k=sprintf("%02d", $i).'wk'.sprintf("%02d", $j);
+while(1){
+	$k=sprintf("%02dwk%02d",$i,$j);
 	push (@wk , $k);
+	if($k eq $endwk)
+		{last;}
 	++$j;
 	if($j == 53)
 		{$j=1;++$i;}
-	}while($k  ne  $endwk);
-#map{print $_.','}@wk;
-#print "\n";
-exit 0;
+}
+$debug and map{print $_.','}@wk and print "\n";
 #$year=$YearNow; #assumes the project doesn't span accross years
 
 #Build an array of weeks 
@@ -53,8 +54,8 @@ foreach(@pri){
 #print "$date,$wk,$cat,$issue\n";
 #Normalise wk number
 #Anything that happened before $startwk is accounted to that $startweek
-	if($wk lt $startwkTag)
-		{$wk = $startwkTag;}
+	if($wk lt $startwk)
+		{$wk = $startwk;}
 	$total{$team,$wk,$cat,$pri}+=1;
 	}
 }

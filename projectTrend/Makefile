@@ -10,7 +10,7 @@ include ../jira.mk
 team=xs-ring3
 IssueVersion=Creedence
 FixVersion=Creedence Outgoing
-startDate=2014-04-01 00:00:00
+startDate=2014-04-01
 deployTarget=/local/scratch/creedence
 ########################end of custom section##################################################
 #Sets of csv targets
@@ -25,7 +25,7 @@ params+= --variable=TEAM="$(call qw,$(team))" --variable=PROJECTS="'CA'"
 params+= --variable=RELIN="$(IssueVersion)" --variable=RELEXCL="$(FixVersion)"
 params+= --variable=STATUS="'Resolved','Closed'" --variable=STARTDATE="'$(startDate)'"
 #autogen vars
-startWk:=$(shell date --date="$(startDate)" +"%V")
+startWk:=$(shell date --date="$(startDate)" +"%ywk%V")
 ###############################################################################################
 all: $(inflowCSV) $(outflowCSV) $(inflowByPriority) $(outflowByPriority) $(report) $(team).trend.csv
 
