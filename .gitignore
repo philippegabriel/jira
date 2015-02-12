@@ -1,4 +1,6 @@
 .config
 *.csv
 *.png
+*.html
+!index.html
 

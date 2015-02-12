@@ -8,10 +8,10 @@
 include ../jira.mk
 ##########################customise this section###############################################
 team=xs-ring3
-IssueVersion=Creedence
-ExcludeVersion=Creedence Outgoing
+IssueVersion=Dundee
+ExcludeVersion=Dundee Outgoing
 startDate=2014-04-01
-deployTarget=/local/scratch/creedence
+deployTarget=/local/scratch/dundee
 ########################end of custom section##################################################
 #Sets of csv targets
 inflowCSV =$(team).C+.csv $(team).V+.csv $(team).T+.csv $(team).BC.P+.csv $(team).M.P+.csv $(team).O+.csv
@@ -26,8 +26,13 @@ params+= --variable=RELIN="$(IssueVersion)" --variable=RELEXCL="$(ExcludeVersion
 params+= --variable=STATUS="'Resolved','Closed'" --variable=STARTDATE="'$(startDate)'"
 #autogen vars
 startWk:=$(shell date --date="$(startDate)" +"%ywk%V")
+htmlreport=$(subst csv,html,$(report))
+#targets
+targets=$(inflowCSV) $(outflowCSV)
+targets+=$(inflowByPriority) $(outflowByPriority)
+targets+=$(report) $(htmlreport) $(team).trend.csv $(team).trend.html
 ###############################################################################################
-all: $(inflowCSV) $(outflowCSV) $(inflowByPriority) $(outflowByPriority) $(report) $(team).trend.csv
+all: $(targets)
 
 $(team).Blocker,Critical.inflow.csv: $(inflowCSV)
 	grep -P --no-filename '^.*?,.*?,.\+,.*?,(Critical|Blocker),' $^ > /tmp/raw.$@ || true
@@ -46,17 +51,17 @@ $(team).Major.outflow.csv: $(outflowCSV)
 
 $(team).%.report.csv: $(team).%.inflow.csv $(team).%.outflow.csv
 	@echo "Generating report $@..."
-	date "+Report generated: %m %b %Y %R %ywk%V"	>  $@
-	@echo 'Team: $(team)'							>>  $@
-	@echo 'Release: $(IssueVersion)'				>>  $@
-	@echo 'Priority: $(priority)'					>>  $@
+	date "+Report generated,%m %b %Y %R %ywk%V"	>  $@
+	@echo 'Team,$(team)'							>>  $@
+	@echo 'Release,$(IssueVersion)'				>>  $@
+	@echo 'Priority,$(priority)'					>>  $@
 	@echo 											>>  $@
-	@echo 'C+ Created                    R- Issue Resolved'			>>  $@
-	@echo 'V+ Version set to project     V- Issue set to outgoing'	>>  $@
-	@echo 'P+ Priority promoted          P- Priority demoted'		>>  $@
-	@echo 'T+ Team affected              T- Team not affected'		>>  $@
-	@echo 'O+ Issue Reopened'						>>  $@
-	@echo 											>>  $@
+	@echo 'C+ Created,R- Issue Resolved'			>>  $@
+	@echo 'V+ Version set to project,V- Issue set to outgoing'	>>  $@
+	@echo 'P+ Priority promoted,P- Priority demoted'		>>  $@
+	@echo 'T+ Team affected,T- Team not affected'		>>  $@
+	@echo 'O+ Issue Reopened',						>>  $@
+	@echo '__________________,______________________'>>  $@
 	@cat $^ | sort -r >>  $@
 $(team).trend.csv: $(report)
 	./genstats.pl --startweek $(startWk) --team $(team) > $@
@@ -89,9 +94,13 @@ $(team).%.csv: %.sql
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Blocker','Critical','Major'" --variable=LOG="$*" \
 	-f $< | uniq >   $@
-deploy:
+%.html: %.csv
+	./csv2html.pl < $< > $@
+
+deploy: trend.html
 	cp -f *report.csv trend.csv $(deployTarget)/csv/
-	cp -f index.html $(deployTarget)/
+	cp -f index.html *.css $(deployTarget)/
+	cp -f *.html *.css $(deployTarget)/html/
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 test:
