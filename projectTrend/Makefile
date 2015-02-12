@@ -9,7 +9,7 @@ include ../jira.mk
 ##########################customise this section###############################################
 team=xs-ring3
 IssueVersion=Creedence
-FixVersion=Creedence Outgoing
+ExcludeVersion=Creedence Outgoing
 startDate=2014-04-01
 deployTarget=/local/scratch/creedence
 ########################end of custom section##################################################
@@ -22,7 +22,7 @@ report=$(team).Blocker,Critical.report.csv $(team).Major.report.csv
 #psql params
 params=--field-separator="," --no-align --tuples-only 
 params+= --variable=TEAM="$(call qw,$(team))" --variable=PROJECTS="'CA'"
-params+= --variable=RELIN="$(IssueVersion)" --variable=RELEXCL="$(FixVersion)"
+params+= --variable=RELIN="$(IssueVersion)" --variable=RELEXCL="$(ExcludeVersion)"
 params+= --variable=STATUS="'Resolved','Closed'" --variable=STARTDATE="'$(startDate)'"
 #autogen vars
 startWk:=$(shell date --date="$(startDate)" +"%ywk%V")
@@ -30,22 +30,19 @@ startWk:=$(shell date --date="$(startDate)" +"%ywk%V")
 all: $(inflowCSV) $(outflowCSV) $(inflowByPriority) $(outflowByPriority) $(report) $(team).trend.csv
 
 $(team).Blocker,Critical.inflow.csv: $(inflowCSV)
-	grep -P --no-filename '^.*?,.*?,.\+,.*?,(Critical|Blocker),' $^ > /tmp/raw.$@
+	grep -P --no-filename '^.*?,.*?,.\+,.*?,(Critical|Blocker),' $^ > /tmp/raw.$@ || true
 	sort -r /tmp/raw.$@ | ./rmdupIn.pl	>  $@
 $(team).Blocker,Critical.outflow.csv: $(outflowCSV)
-	grep -P --no-filename '^.*?,.*?,.\-,.*?,(Critical|Blocker),' $^ > /tmp/raw.$@
+	grep -P --no-filename '^.*?,.*?,.\-,.*?,(Critical|Blocker),' $^ > /tmp/raw.$@ || true
 	sort -r /tmp/raw.$@ | ./rmdupOut.pl $(team).Blocker,Critical.inflow.csv >  $@
 $(team).Major.inflow.csv: $(inflowCSV)
-	grep -P --no-filename '^.*?,.*?,.\+,.*?,Major,' $^ > /tmp/raw.$@
+	grep -P --no-filename '^.*?,.*?,.\+,.*?,Major,' $^ > /tmp/raw.$@ || true
 	sort -r /tmp/raw.$@ | ./rmdupIn.pl	>  $@
 $(team).Major.outflow.csv: $(outflowCSV)
-	grep -P --no-filename '^.*?,.*?,.\-,.*?,Major,' $^ > /tmp/raw.$@
+	grep -P --no-filename '^.*?,.*?,.\-,.*?,Major,' $^ > /tmp/raw.$@ || true
 	grep ',P+,' $(team).Blocker,Critical.inflow.csv > /tmp/inflowmap.$@ || true
 	cat  $(team).Major.inflow.csv >> /tmp/inflowmap.$@ 
 	sort -r /tmp/raw.$@ | ./rmdupOut.pl /tmp/inflowmap.$@ >  $@
-
-#$(team).Major.outflow.csv: $(outflowCSV)
-#	grep ',P+,' $(team).Blocker,Critical.inflow.csv > /tmp/inflowmap.$@ || true
 
 $(team).%.report.csv: $(team).%.inflow.csv $(team).%.outflow.csv
 	@echo "Generating report $@..."
@@ -68,22 +65,27 @@ clean:
 reallyclean:
 	rm -f *.csv
 $(team).BC.P+.csv: P+.sql
+	touch $@
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Blocker','Critical'" --variable=LOG="P+" \
 	-f $< | uniq >   $@
 $(team).M.P+.csv: P+.sql
+	touch $@
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Major'" --variable=LOG="P+" \
 	-f $< | uniq >   $@
 $(team).BC.P-.csv: P-.sql
+	touch $@
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Blocker','Critical'"	--variable=LOG="P-" \
 	-f $< | uniq >   $@
 $(team).M.P-.csv: P-.sql
+	touch $@
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Major'" --variable=LOG="P-" \
 	-f $< | uniq >   $@
 $(team).%.csv: %.sql
+	touch $@
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Blocker','Critical','Major'" --variable=LOG="$*" \
 	-f $< | uniq >   $@
