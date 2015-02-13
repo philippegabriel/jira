@@ -67,8 +67,11 @@ while (<>){
 }
 my $tmpl = HTML::Template->new(scalarref => \get_tmpl(), loop_context_vars => 1);
 $tmpl->param(table => \@table);
-print $tmpl->output;
-
+$page=$tmpl->output;
+#remove all empty lines
+$page =~ s/(^|\n)[\n\s]*/$1/g;
+$page =~ s/<tr.*?>\n<td>team/<tr class="separator">\n<td>team/mg;
+print $page;
 sub get_tmpl{
 #see: http://search.cpan.org/~wonko/HTML-Template-2.95/lib/HTML/Template.pm
     return <<TMPL
