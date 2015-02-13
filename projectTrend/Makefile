@@ -16,9 +16,9 @@ deployTarget=/local/scratch/dundee
 #Sets of csv targets
 inflowCSV =$(team).C+.csv $(team).V+.csv $(team).T+.csv $(team).BC.P+.csv $(team).M.P+.csv $(team).O+.csv
 outflowCSV=$(team).R-.csv $(team).V-.csv $(team).T-.csv $(team).BC.P-.csv $(team).M.P-.csv 
-inflowByPriority= $(team).Blocker,Critical.inflow.csv   $(team).Major.inflow.csv
-outflowByPriority=$(team).Blocker,Critical.outflow.csv  $(team).Major.outflow.csv
-report=$(team).Blocker,Critical.report.csv $(team).Major.report.csv
+inflowByPriority= $(team).BC.inflow.csv   $(team).M.inflow.csv
+outflowByPriority=$(team).BC.outflow.csv  $(team).M.outflow.csv
+report=$(team).BC.report.csv $(team).M.report.csv
 #psql params
 params=--field-separator="," --no-align --tuples-only 
 params+= --variable=TEAM="$(call qw,$(team))" --variable=PROJECTS="'CA'"
@@ -28,33 +28,33 @@ params+= --variable=STATUS="'Resolved','Closed'" --variable=STARTDATE="'$(startD
 startWk:=$(shell date --date="$(startDate)" +"%ywk%V")
 htmlreport=$(subst csv,html,$(report))
 #targets
-targets=$(inflowCSV) $(outflowCSV)
+Jiratargets=$(inflowCSV) $(outflowCSV)
 targets+=$(inflowByPriority) $(outflowByPriority)
 targets+=$(report) $(htmlreport) $(team).trend.csv $(team).trend.html
 ###############################################################################################
-all: $(targets)
+all: $(Jiratargets) $(targets)
 
-$(team).Blocker,Critical.inflow.csv: $(inflowCSV)
+$(team).BC.inflow.csv: $(inflowCSV)
 	grep -P --no-filename '^.*?,.*?,.\+,.*?,(Critical|Blocker),' $^ > /tmp/raw.$@ || true
 	sort -r /tmp/raw.$@ | ./rmdupIn.pl	>  $@
-$(team).Blocker,Critical.outflow.csv: $(outflowCSV)
+$(team).BC.outflow.csv: $(outflowCSV)
 	grep -P --no-filename '^.*?,.*?,.\-,.*?,(Critical|Blocker),' $^ > /tmp/raw.$@ || true
-	sort -r /tmp/raw.$@ | ./rmdupOut.pl $(team).Blocker,Critical.inflow.csv >  $@
-$(team).Major.inflow.csv: $(inflowCSV)
+	sort -r /tmp/raw.$@ | ./rmdupOut.pl $(team).BC.inflow.csv >  $@
+$(team).M.inflow.csv: $(inflowCSV)
 	grep -P --no-filename '^.*?,.*?,.\+,.*?,Major,' $^ > /tmp/raw.$@ || true
 	sort -r /tmp/raw.$@ | ./rmdupIn.pl	>  $@
-$(team).Major.outflow.csv: $(outflowCSV)
+$(team).M.outflow.csv: $(outflowCSV)
 	grep -P --no-filename '^.*?,.*?,.\-,.*?,Major,' $^ > /tmp/raw.$@ || true
-	grep ',P+,' $(team).Blocker,Critical.inflow.csv > /tmp/inflowmap.$@ || true
-	cat  $(team).Major.inflow.csv >> /tmp/inflowmap.$@ 
+	grep ',P+,' $(team).BC.inflow.csv > /tmp/inflowmap.$@ || true
+	cat  $(team).M.inflow.csv >> /tmp/inflowmap.$@ 
 	sort -r /tmp/raw.$@ | ./rmdupOut.pl /tmp/inflowmap.$@ >  $@
 
 $(team).%.report.csv: $(team).%.inflow.csv $(team).%.outflow.csv
 	@echo "Generating report $@..."
-	date "+Report generated,%m %b %Y %R %ywk%V"	>  $@
-	@echo 'Team,$(team)'							>>  $@
-	@echo 'Release,$(IssueVersion)'				>>  $@
-	@echo 'Priority,$(priority)'					>>  $@
+	date "+Report generated %d %b %Y %R %ywk%V"	>  $@
+	@echo 'team,$(team)'							>>  $@
+	@echo 'release,$(IssueVersion)'				>>  $@
+	@echo 'priority,$(priority)'					>>  $@
 	@echo 											>>  $@
 	@echo 'C+ Created,R- Issue Resolved'			>>  $@
 	@echo 'V+ Version set to project,V- Issue set to outgoing'	>>  $@
@@ -66,8 +66,9 @@ $(team).%.report.csv: $(team).%.inflow.csv $(team).%.outflow.csv
 $(team).trend.csv: $(report)
 	./genstats.pl --startweek $(startWk) --team $(team) > $@
 clean: 
-	rm -f *.report.csv report.csv *inflow.csv *outflow.csv *.trend.csv trend.csv
-reallyclean:
+	rm -f *report.csv *inflow.csv *outflow.csv *trend.csv
+	rm -f *report.html *inflow.html *outflow.html *trend.html
+reallyclean: clean
 	rm -f *.csv
 $(team).BC.P+.csv: P+.sql
 	touch $@
@@ -94,8 +95,12 @@ $(team).%.csv: %.sql
 	$(setJiraPass) ; $(ConnectToJira) $(params) \
 	--variable=PRIORITY="'Blocker','Critical','Major'" --variable=LOG="$*" \
 	-f $< | uniq >   $@
-%.html: %.csv
-	./csv2html.pl < $< > $@
+%.report.html: %.report.csv
+	./csvreport2html.pl < $< > $@
+%.trend.html: %.trend.csv
+	./csvtrend2html.pl < $< > $@
+trend.html: trend.csv
+	./csvtrend2html.pl < $< > $@
 
 deploy: trend.html
 	cp -f *report.csv trend.csv $(deployTarget)/csv/

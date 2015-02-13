@@ -18,7 +18,7 @@ make team=$allteam IssueVersion=$IssueVersion ExcludeVersion=$ExcludeVersion sta
 #
 #Generate stats
 #
-date "+Report generated: %m %b %Y %R %ywk%V"	>  trend.csv
+date "+Report generated %d %b %Y %R %ywk%V"	>  trend.csv
 for team in $teams
 do
 	cat $team.trend.csv >> trend.csv

@@ -35,7 +35,7 @@ $debug and map{print $_.','}@wk and print "\n";
 #Build an array of weeks 
 #@wk=map{$year.'wk'.$_} ($startwk..$endwk);
 #$startwkTag=$year.'wk'.$startwk;
-@pri =('Blocker,Critical','Major');
+@pri =('BC','M');
 @inflowCat=qw(C+ V+ P+ T+ O+);
 @outflowCat=qw(R- V- P- T-);
 @cat=(@inflow,@outflow);
@@ -62,7 +62,6 @@ foreach(@pri){
 #generate the csv
 $ppteam = $team;
 $ppteam =~ s/,/ & /g; # pretty print team(s)
-print '____'.$ppteam.'____'; print ',______' x scalar @wk; print "\n";
 foreach(@pri){
 	$pri=$_;
 #initialise arrays
@@ -94,16 +93,17 @@ foreach(@pri){
 	pop(@unresStart);
 	unshift(@unresStart,0);
 #Output the csv data
+	print 'team,'.$ppteam."\n";
 	$pri =~ s/,/ & /g; # pretty print priority
-	print "Priority: $pri\n";
-	print 'wk number,',join(',',@wk),"\n";
-	print 'Unresolved (start of week),',join(',',@unresStart),"\n";
+	print "priority,$pri\n";
+	print 'week,',join(',',@wk),"\n";
+	print 'unresolved (start of week),',join(',',@unresStart),"\n";
 	map{print $_,$inStr{$_},"\n"}@inflowCat;
-	print 'Inflow,',join(',',@inflow),"\n";
+	print 'inflow,',join(',',@inflow),"\n";
 	map{print $_,$outStr{$_},"\n"}@outflowCat;
-	print 'Outflow,',join(',',@outflow),"\n";
-	print 'Unresolved (end of week),',join(',',@unresEnd),"\n";
-	print 'Cumulative defects raised,',join(',',@cumul),"\n";
+	print 'outflow,',join(',',@outflow),"\n";
+	print 'unresolved (end of week),',join(',',@unresEnd),"\n";
+	print 'cumulative defects raised,',join(',',@cumul),"\n";
 	print "\n";
 }
 exit 0;
