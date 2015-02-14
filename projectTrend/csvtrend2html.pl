@@ -9,6 +9,8 @@ sub fetchLinks{
 ($team,$cat,$pri,$week,$x)=@_;
 if(not defined $x or $x=~ m/^\s*$/)
 	{return ' ';}
+if($x eq '0')
+	{return '0';}
 $team =~ s/ & /,/g; 
 $file="$team.$pri.report.csv";
 open my $handle, '<', $file or die "ABORT: $file NOT FOUND!\n";;
@@ -31,21 +33,22 @@ while (<>){
     chomp;
 #rule for long team name
 	@fields=split(/,/);
-	if(defined $fields[0] and $fields[0] =~ m/^team/){
+	if(not defined $fields[0]){next;}
+	if($fields[0] =~ m/^team/){
 		$team=$fields[1];
 		if(length $fields[1] > 20){
 			$fields[1]='All teams'}
 	}
-	elsif(defined $fields[0] and $fields[0] =~ m/^priority$/){
+	elsif($fields[0] =~ m/^priority$/){
 #print "helloPrio\n";
 		$priority=$fields[1]}
-	elsif(defined $fields[0] and $fields[0] =~ m/^week$/){
+	elsif($fields[0] =~ m/^week$/){
 #print "helloWeeks\n";
 #		shift @fields;
 		@weeks=@fields[1..$#fields];
 #		print join(',',@weeks);
 		}
-	elsif(defined $fields[0] and $fields[0] =~ m/^[CVPTOR][\+\-]$/){
+	elsif($fields[0] =~ m/^[CVPTOR][\+\-]$/){
 #print "helloC+\n";
 		$cat=shift @fields;
 		@links=();
@@ -56,8 +59,31 @@ while (<>){
 			$url=fetchLinks($team,$cat,$priority,$_,$x);
 			push @links,$url;
 			}
-		@fields=@links;
-};
+		@fields=@links;}
+	elsif($fields[0] =~ m/^inflow$/){
+#print "helloC+\n";
+		$cat=shift @fields;
+		@links=();
+		push @links,$cat;
+		foreach(@weeks){
+#print "helloinWeeks\n";
+			$x=shift @fields;
+			$url=fetchLinks($team,'[CVPTOR]\+',$priority,$_,$x);
+			push @links,$url;
+			}
+		@fields=@links;}
+	elsif($fields[0] =~ m/^outflow$/){
+#print "helloC+\n";
+		$cat=shift @fields;
+		@links=();
+		push @links,$cat;
+		foreach(@weeks){
+#print "helloinWeeks\n";
+			$x=shift @fields;
+			$url=fetchLinks($team,'[CVPTOR]\-',$priority,$_,$x);
+			push @links,$url;
+			}
+		@fields=@links;}
 		
 #insert href to Jira issues
 #	s/,(CA-\d+)/,$url$1\">$1<\/a>/;
