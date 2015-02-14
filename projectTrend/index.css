@@ -5,7 +5,10 @@ body {font-size:100%;}
 table{border-collapse:collapse;}
 td, th {border:1px solid #98bf21;}
 tr.alt td {background-color:#EAF2D3;}
-tr.separator td {background-color:#FF0000;font-weight:bold;color:white;}
+tr.team td {background-color:#FF0000;font-weight:bold;color:white;}
+tr.week td {background-color:#999999;font-weight:bold;color:white;}
+tr.inflow td {background-color:#669900;font-weight:bold;color:white;}
+tr.outflow td {background-color:#669900;font-weight:bold;color:white;}
 table.noborder > tbody > tr > td {border: none;}
 table.report > tbody > tr > td{font-size:0.875em;}
 .nowrap{white-space: nowrap;}

@@ -7,7 +7,7 @@ use HTML::Template;
 my @table;
 sub fetchLinks{
 ($team,$cat,$pri,$week,$x)=@_;
-if(not defined $x)
+if(not defined $x or $x=~ m/^\s*$/)
 	{return ' ';}
 $team =~ s/ & /,/g; 
 $file="$team.$pri.report.csv";
@@ -51,13 +51,12 @@ while (<>){
 		@links=();
 		push @links,$cat;
 		foreach(@weeks){
-	#print "helloinWeeks\n";
+#print "helloinWeeks\n";
 			$x=shift @fields;
 			$url=fetchLinks($team,$cat,$priority,$_,$x);
 			push @links,$url;
 			}
 		@fields=@links;
-#		map{push @links,fetchLinks(shift @fields,)}@weeks;
 };
 		
 #insert href to Jira issues
@@ -70,7 +69,10 @@ $tmpl->param(table => \@table);
 $page=$tmpl->output;
 #remove all empty lines
 $page =~ s/(^|\n)[\n\s]*/$1/g;
-$page =~ s/<tr.*?>\n<td>team/<tr class="separator">\n<td>team/mg;
+$page =~ s/<tr.*?>\n<td>team/<tr class="team">\n<td>team/mg;
+$page =~ s/<tr.*?>\n<td>week/<tr class="week">\n<td>team/mg;
+$page =~ s/<tr.*?>\n<td>inflow/<tr class="inflow">\n<td>inflow/mg;
+$page =~ s/<tr.*?>\n<td>outflow/<tr class="outflow">\n<td>outflow/mg;
 print $page;
 sub get_tmpl{
 #see: http://search.cpan.org/~wonko/HTML-Template-2.95/lib/HTML/Template.pm
