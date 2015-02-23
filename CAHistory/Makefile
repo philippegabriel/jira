@@ -5,11 +5,14 @@
 # see: https://developer.atlassian.com/display/JIRADEV/Database+Schema
 #
 .PHONY: mkdir login clean reallyclean check test jiraquery
+include ../jira.mk
 ###################customise this section###################################
 #release info
-#release=clearwater
-release=tampa
+release=creedence
+#release=tampa
 #xmin and xmax define the interval plotted from the csv file
+creedence.xminrange=241
+creedence.xmaxrange=259
 clearwater.xminrange=205
 clearwater.xmaxrange=242
 tampa.xminrange=170
@@ -30,15 +33,7 @@ teamtargets=$(allPriteamtargets) $(B+Cteamtargets)
 pngteamtargets=$(subst csv,png,$(teamtargets))
 #thumbnails
 thumbnails=$(subst .png,.thumb.png,$(subst png/,thumb/,$(pngtargets) $(pngteamtargets)))
-#jira server params, read from .config file
-host=$(lastword $(shell grep 'host' .config))
-dbname=$(lastword $(shell grep 'dbname' .config))
-username=$(lastword $(shell grep 'username' .config))
-password=$(lastword $(shell grep 'password' .config))
-ConnectToJira=psql --host=$(host) --dbname=$(dbname) --username=$(username)
-setJiraPass=export PGPASSWORD=$(password)
 ###################rules#####################################################
-#all: $(targets) $(pngtargets) $(teamtargets) $(pngteamtargets)
 all: mkdir $(targets) $(pngtargets) $(teamtargets) $(pngteamtargets) $(thumbnails)
 jiraquery: $(jiratargets)
 mkdir:
