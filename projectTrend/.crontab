@@ -1,0 +1,4 @@
+PATH=/bin:/usr/bin
+0 7,13 * * * cd /local/scratch/philippeg/jira/projectTrend;./genreport.sh;./deploy.sh
+
+
