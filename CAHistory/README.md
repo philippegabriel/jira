@@ -1,4 +1,4 @@
-inFlowOutFlowGraph
+CAHistory
 ==================
 Graph JIRA inflow and outflow of defects
 
