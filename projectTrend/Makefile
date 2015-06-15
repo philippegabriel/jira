@@ -11,7 +11,6 @@ team=xs-ring3
 IssueVersion=Dundee
 ExcludeVersion=Dundee Outgoing
 startDate=2014-04-01
-deployTarget=/local/scratch/dundee
 ########################end of custom section##################################################
 #Sets of csv targets
 inflowCSV =$(team).C+.csv $(team).V+.csv $(team).T+.csv $(team).BC.P+.csv $(team).M.P+.csv $(team).O+.csv
@@ -102,10 +101,6 @@ $(team).%.csv: %.sql
 trend.html: trend.csv
 	./csvtrend2html.pl < $< > $@
 
-deploy: trend.html
-	cp -f *report.csv trend.csv $(deployTarget)/csv/
-	cp -f index.html *.css $(deployTarget)/
-	cp -f *.html *.css $(deployTarget)/html/
 login:
 	$(setJiraPass) ; $(ConnectToJira)
 test:

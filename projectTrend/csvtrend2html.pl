@@ -20,7 +20,10 @@ close $handle;
 $pattern=$week.','.$cat;
 @CAs=();
 foreach(grep(/$pattern/, @lines)){
-($day,$week,$cat,$id,$rest)=split(/,/);
+{
+   no warnings 'once';
+	($day,$week,$cat,$id,$rest)=split(/,/);
+}
 #print "hello\n";
 push @CAs,$id;
 }
