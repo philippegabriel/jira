@@ -4,6 +4,7 @@
 body {font-size:100%;}
 table{border-collapse:collapse;}
 td, th {border:1px solid #98bf21;}
+h3 {text-align:center;background-color:#4682B4;font-weight:bold;color:white;}
 .alt {background-color:#EAF2D3;}
 .team {background-color:#FF0000;font-weight:bold;color:white;}
 .week {background-color:#999999;font-weight:bold;color:white;}

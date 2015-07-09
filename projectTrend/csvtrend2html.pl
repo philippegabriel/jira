@@ -32,11 +32,15 @@ return '<a href="'.$url.'">'.$x.'</a>';
 }
 while (<>){
 	chomp;
+	if(m/^Report/){
+		$title=$_;
+		next;
+	}
 	@fields=split(/,/);
 	@links=();
 #Skip empty lines
 	if(not defined $fields[0]){next;}
-	if($fields[0] =~ m/^team/){
+	elsif($fields[0] =~ m/^team/){
 		$team=$fields[1];
 #For compound team name, subsitute with 'All teams'
 		if(length $fields[1] > 20){
@@ -83,10 +87,12 @@ while (<>){
     push @table, {row => \@row};
 }
 my $tmpl = HTML::Template->new(scalarref => \get_tmpl(), loop_context_vars => 1);
+$tmpl->param(title => $title);
 $tmpl->param(table => \@table);
 $page=$tmpl->output;
 #remove all empty lines
 $page =~ s/(^|\n)[\n\s]*/$1/g;
+#Add class definition for css
 $page =~ s/<tr.*?>\n<td>team/<tr class="team">\n<td>team/mg;
 $page =~ s/<tr.*?>\n<td>week/<tr class="week">\n<td>team/mg;
 $page =~ s/<tr.*?>\n<td>inflow/<tr class="inflow">\n<td>inflow/mg;
@@ -104,6 +110,7 @@ sub get_tmpl{
 <link rel="stylesheet" type="text/css" href="index.css" />
 </head>
 <body>
+<h3><TMPL_VAR NAME=title></h3>
 <table>
 <TMPL_LOOP table>
 <TMPL_IF NAME="__even__">
