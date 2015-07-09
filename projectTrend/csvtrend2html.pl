@@ -24,64 +24,54 @@ foreach(grep(/$pattern/, @lines)){
    no warnings 'once';
 	($day,$week,$cat,$id,$rest)=split(/,/);
 }
-#print "hello\n";
 push @CAs,$id;
 }
 $y=join('%2C',@CAs);
-#print $y;
 $url='https://issues.citrite.net/issues/?jql=project%20%3D%20CA%20AND%20key%20IN%20('.$y.')';
 return '<a href="'.$url.'">'.$x.'</a>';
 }
 while (<>){
-    chomp;
-#rule for long team name
+	chomp;
 	@fields=split(/,/);
+	@links=();
+#Skip empty lines
 	if(not defined $fields[0]){next;}
 	if($fields[0] =~ m/^team/){
 		$team=$fields[1];
+#For compound team name, subsitute with 'All teams'
 		if(length $fields[1] > 20){
 			$fields[1]='All teams'}
 	}
 	elsif($fields[0] =~ m/^priority$/){
-#print "helloPrio\n";
 		$priority=$fields[1]}
 	elsif($fields[0] =~ m/^week$/){
-#print "helloWeeks\n";
-#		shift @fields;
 		@weeks=@fields[1..$#fields];
-#		print join(',',@weeks);
 		}
 	elsif($fields[0] =~ m/^[CVPTOR][\+\-]$/){
-#print "helloC+\n";
 		$cat=shift @fields;
-		@links=();
+#		@links=();
 		push @links,$cat;
 		foreach(@weeks){
-#print "helloinWeeks\n";
 			$x=shift @fields;
 			$url=fetchLinks($team,$cat,$priority,$_,$x);
 			push @links,$url;
 			}
 		@fields=@links;}
 	elsif($fields[0] =~ m/^inflow$/){
-#print "helloC+\n";
 		$cat=shift @fields;
-		@links=();
+#		@links=();
 		push @links,$cat;
 		foreach(@weeks){
-#print "helloinWeeks\n";
 			$x=shift @fields;
 			$url=fetchLinks($team,'[CVPTOR]\+',$priority,$_,$x);
 			push @links,$url;
 			}
 		@fields=@links;}
 	elsif($fields[0] =~ m/^outflow$/){
-#print "helloC+\n";
 		$cat=shift @fields;
-		@links=();
+#		@links=();
 		push @links,$cat;
 		foreach(@weeks){
-#print "helloinWeeks\n";
 			$x=shift @fields;
 			$url=fetchLinks($team,'[CVPTOR]\-',$priority,$_,$x);
 			push @links,$url;
@@ -89,7 +79,6 @@ while (<>){
 		@fields=@links;}
 		
 #insert href to Jira issues
-#	s/,(CA-\d+)/,$url$1\">$1<\/a>/;
     my @row = map{{cell => $_}}@fields;
     push @table, {row => \@row};
 }
