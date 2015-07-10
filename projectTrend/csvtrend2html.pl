@@ -94,7 +94,7 @@ $page=$tmpl->output;
 $page =~ s/(^|\n)[\n\s]*/$1/g;
 #Add class definition for css
 $page =~ s/<tr.*?>\n<td>team/<tr class="team">\n<td>team/mg;
-$page =~ s/<tr.*?>\n<td>week/<tr class="week">\n<td>team/mg;
+$page =~ s/<tr.*?>\n<td>week/<tr class="week">\n<td>week/mg;
 $page =~ s/<tr.*?>\n<td>inflow/<tr class="inflow">\n<td>inflow/mg;
 $page =~ s/<tr.*?>\n<td>outflow/<tr class="outflow">\n<td>outflow/mg;
 print $page;
