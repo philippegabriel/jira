@@ -45,9 +45,8 @@ while (<>){
 #For compound team name, subsitute with 'All teams'
 		if(length $fields[1] > 20){
 			$fields[1]='All teams'}
-	}
-	elsif($fields[0] =~ m/^priority$/){
-		$priority=$fields[1]}
+#	elsif($fields[0] =~ m/^priority$/){
+		$priority=$fields[3]}
 	elsif($fields[0] =~ m/^week$/){
 		@weeks=@fields[1..$#fields];
 		}

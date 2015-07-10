@@ -93,9 +93,8 @@ foreach(@pri){
 	pop(@unresStart);
 	unshift(@unresStart,0);
 #Output the csv data
-	print 'team,'.$ppteam."\n";
 	$pri =~ s/,/ & /g; # pretty print priority
-	print "priority,$pri\n";
+	print "team,$ppteam,priority,$pri\n";
 	print 'week,',join(',',@wk),"\n";
 	print 'unresolved (start of week),',join(',',@unresStart),"\n";
 	map{print $_,$inStr{$_},"\n"}@inflowCat;

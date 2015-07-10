@@ -10,8 +10,7 @@ allteam=`echo $teams | sed 's/ /,/g'`
 #
 #reset everything
 #
-#make reallyclean
-make clean
+make reallyclean
 #run per team query
 for team in $teams
 do
