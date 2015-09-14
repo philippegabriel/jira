@@ -16,3 +16,4 @@ prerequisites:
 Sample Graphs:
 ==============
 ![LCM by quarters](doc/SCTX.byQuarter.png)
+![LCM by Months](doc/SCTX.byMonth.png)
