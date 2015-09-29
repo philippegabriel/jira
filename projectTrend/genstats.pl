@@ -35,15 +35,13 @@ $debug and map{print $_.','}@wk and print "\n";
 #Build an array of weeks 
 #@wk=map{$year.'wk'.$_} ($startwk..$endwk);
 #$startwkTag=$year.'wk'.$startwk;
-@pri =('BC','M');
 @inflowCat=qw(C+ V+ P+ T+ O+);
 @outflowCat=qw(R- V- P- T-);
 @cat=(@inflow,@outflow);
 
 #parse the totals
-foreach(@pri){
-	$pri=$_;
-	$file="$team.$pri.report.csv";
+#foreach(@pri){
+	$file="$team.report.csv";
 #grep the CAs
 	-e $file or die "ABORT: $file NOT FOUND!\n";
 	@CAs= `grep -E CA-[0-9]+ $file`;
@@ -56,14 +54,13 @@ foreach(@pri){
 #Anything that happened before $startwk is accounted to that $startweek
 	if($wk lt $startwk)
 		{$wk = $startwk;}
-	$total{$team,$wk,$cat,$pri}+=1;
+	$total{$team,$wk,$cat}+=1;
 	}
-}
+#}
 #generate the csv
 $ppteam = $team;
 $ppteam =~ s/,/ & /g; # pretty print team(s)
-foreach(@pri){
-	$pri=$_;
+#foreach(@pri){
 #initialise arrays
 	@outflow=();@inflow=();@cumul=();@unresEnd=();
 	map{$outStr{$_}=''}@outflowCat;
@@ -73,20 +70,20 @@ foreach(@pri){
 		$wk=$_;
 #Compute the Outflow
 		$outflow=0;
-		map{$outflow+=$total{$team,$wk,$_,$pri}}@outflowCat;
+		map{$outflow+=$total{$team,$wk,$_}}@outflowCat;
 		push(@outflow,$outflow);
 #Compute the Inflow, cumulative inflow, Unresolved per week
 		$inflow=0;
-		map{$inflow+=$total{$team,$wk,$_,$pri}}@inflowCat;
+		map{$inflow+=$total{$team,$wk,$_}}@inflowCat;
 		$cumul+=$inflow;
 		$unres+=$inflow-$outflow;
 		push(@inflow,$inflow);
 		push(@cumul,$cumul);
 		push(@unresEnd,$unres);
 #Generate string for all categories of outflow
-		map{$outStr{$_}.= ",$total{$team,$wk,$_,$pri}"}@outflowCat;
+		map{$outStr{$_}.= ",$total{$team,$wk,$_}"}@outflowCat;
 #Generate string for all categories of inflow
-		map{$inStr{$_}.= ",$total{$team,$wk,$_,$pri}"}@inflowCat;
+		map{$inStr{$_}.= ",$total{$team,$wk,$_}"}@inflowCat;
 	}
 #Compute the Unresolved at start of week
 	@unresStart=@unresEnd;
@@ -94,16 +91,16 @@ foreach(@pri){
 	unshift(@unresStart,0);
 #Output the csv data
 	$pri =~ s/,/ & /g; # pretty print priority
-	print "team,$ppteam,priority,$pri\n";
+	print "team,$ppteam,priority BCM\n";
 	print 'week,',join(',',@wk),"\n";
-	print 'unresolved (start of week),',join(',',@unresStart),"\n";
+#	print 'unresolved (start of week),',join(',',@unresStart),"\n";
 	map{print $_,$inStr{$_},"\n"}@inflowCat;
 	print 'inflow,',join(',',@inflow),"\n";
 	map{print $_,$outStr{$_},"\n"}@outflowCat;
 	print 'outflow,',join(',',@outflow),"\n";
-	print 'unresolved (end of week),',join(',',@unresEnd),"\n";
-	print 'cumulative defects raised,',join(',',@cumul),"\n";
+#	print 'unresolved (end of week),',join(',',@unresEnd),"\n";
+#	print 'cumulative defects raised,',join(',',@cumul),"\n";
 	print "\n";
-}
+#}
 exit 0;
 

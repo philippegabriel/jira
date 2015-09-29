@@ -4,8 +4,8 @@
 #
 IssueVersion=Dundee
 ExcludeVersion="$IssueVersion Outgoing"
-startDate=2014-11-03
-teams="xs-ring0 xs-ring3 xs-datapath xs-storage xs-gui xs-perf xs-windows xs-partner xs-nanjing xs-ns"
+startDate=2015-06-01
+teams="xs-ring0 xs-ring3 xs-datapath xs-gui xs-perf xs-nanjing"
 allteam=`echo $teams | sed 's/ /,/g'`
 #
 #reset everything

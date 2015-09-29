@@ -6,13 +6,13 @@ use HTML::Template;
 
 my @table;
 sub fetchLinks{
-($team,$cat,$pri,$week,$x)=@_;
+($team,$cat,$week,$x)=@_;
 if(not defined $x or $x=~ m/^\s*$/)
 	{return ' ';}
 if($x eq '0')
 	{return '0';}
 $team =~ s/ & /,/g; 
-$file="$team.$pri.report.csv";
+$file="$team.report.csv";
 open my $handle, '<', $file or die "ABORT: $file NOT FOUND!\n";;
 chomp(my @lines = <$handle>);
 close $handle;
@@ -45,8 +45,8 @@ while (<>){
 #For compound team name, subsitute with 'All teams'
 		if(length $fields[1] > 20){
 			$fields[1]='All teams'}
+		}
 #	elsif($fields[0] =~ m/^priority$/){
-		$priority=$fields[3]}
 	elsif($fields[0] =~ m/^week$/){
 		@weeks=@fields[1..$#fields];
 		}
@@ -56,7 +56,7 @@ while (<>){
 		push @links,$cat;
 		foreach(@weeks){
 			$x=shift @fields;
-			$url=fetchLinks($team,$cat,$priority,$_,$x);
+			$url=fetchLinks($team,$cat,$_,$x);
 			push @links,$url;
 			}
 		@fields=@links;}
@@ -66,7 +66,7 @@ while (<>){
 		push @links,$cat;
 		foreach(@weeks){
 			$x=shift @fields;
-			$url=fetchLinks($team,'[CVPTOR]\+',$priority,$_,$x);
+			$url=fetchLinks($team,'[CVPTOR]\+',$_,$x);
 			push @links,$url;
 			}
 		@fields=@links;}
@@ -76,7 +76,7 @@ while (<>){
 		push @links,$cat;
 		foreach(@weeks){
 			$x=shift @fields;
-			$url=fetchLinks($team,'[CVPTOR]\-',$priority,$_,$x);
+			$url=fetchLinks($team,'[CVPTOR]\-',$_,$x);
 			push @links,$url;
 			}
 		@fields=@links;}
