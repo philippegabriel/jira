@@ -55,14 +55,18 @@ $debug and map{print $_.','}@wk and print "\n";
 	if($wk lt $startwk)
 		{$wk = $startwk;}
 	$total{$team,$wk,$cat}+=1;
+	if($cat =~ /\+/)
+		{$wkinflow{$wk}{$issue}+=1}
+	else
+		{$wkoutflow{$wk}{$issue}+=1}
 	}
-#}
 #generate the csv
 $ppteam = $team;
 $ppteam =~ s/,/ & /g; # pretty print team(s)
 #foreach(@pri){
 #initialise arrays
 	@outflow=();@inflow=();@cumul=();@unresEnd=();
+	@wkinflow=();@wkoutflow=();
 	map{$outStr{$_}=''}@outflowCat;
 	map{$inStr{$_}=''}@inflowCat;
 	$cumul=0;$unres=0;
@@ -72,12 +76,20 @@ $ppteam =~ s/,/ & /g; # pretty print team(s)
 		$outflow=0;
 		map{$outflow+=$total{$team,$wk,$_}}@outflowCat;
 		push(@outflow,$outflow);
+		$i=0;
+		if(defined %wkoutflow{$wk}){
+			$i=scalar (keys %wkoutflow{$wk})}
+		push(@wkoutflow,$i);
 #Compute the Inflow, cumulative inflow, Unresolved per week
 		$inflow=0;
 		map{$inflow+=$total{$team,$wk,$_}}@inflowCat;
 		$cumul+=$inflow;
 		$unres+=$inflow-$outflow;
 		push(@inflow,$inflow);
+		$i=0;
+		if(defined  %wkinflow{$wk}){
+			$i=scalar (keys %wkinflow{$wk})}
+		push(@wkinflow,$i);
 		push(@cumul,$cumul);
 		push(@unresEnd,$unres);
 #Generate string for all categories of outflow
@@ -95,9 +107,11 @@ $ppteam =~ s/,/ & /g; # pretty print team(s)
 	print 'week,',join(',',@wk),"\n";
 #	print 'unresolved (start of week),',join(',',@unresStart),"\n";
 	map{print $_,$inStr{$_},"\n"}@inflowCat;
-	print 'inflow,',join(',',@inflow),"\n";
+#	print 'computed inflow,',join(',',@inflow),"\n";
+	print 'inflow,',join(',',@wkinflow),"\n";
 	map{print $_,$outStr{$_},"\n"}@outflowCat;
-	print 'outflow,',join(',',@outflow),"\n";
+#	print 'computed outflow,',join(',',@outflow),"\n";
+	print 'outflow,',join(',',@wkoutflow),"\n";
 #	print 'unresolved (end of week),',join(',',@unresEnd),"\n";
 #	print 'cumulative defects raised,',join(',',@cumul),"\n";
 	print "\n";

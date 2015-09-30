@@ -16,6 +16,11 @@ sub get_tmpl{
 </head>
 <body>
 <h3><TMPL_VAR NAME=title></h3>
+C+ Created,R- Issue Resolved<br>
+V+ Version set to project,V- Issue set to outgoing<br>
+P+ Priority promoted,P- Priority demoted<br>
+T+ Team affected,T- Team not affected<br>
+O+ Issue Reopened<br>
 <table>
 <TMPL_LOOP table>
 <TMPL_IF NAME="__even__">
@@ -55,11 +60,11 @@ foreach(@lines){
 }
 my $y=join('%2C',@CAs);
 my $url='https://issues.citrite.net/issues/?jql=project%20%3D%20CA%20AND%20key%20IN%20('.$y.')';
-if(scalar @CAs != $x){
-	die "ABORT num issue mismatch in csvtrend2html.pl\n";
-	print "input:".$team.",".$cat.",".$week.",".$x."\n";
-	print "out:".$url." ".$x."\n";
-}
+#if(scalar @CAs != $x){
+#	die "ABORT num issue mismatch in csvtrend2html.pl\n";
+#	print "input:".$team.",".$cat.",".$week.",".$x."\n";
+#	print "out:".$url." ".$x."\n";
+#}
 return '<a href="'.$url.'">'.$x.'</a>';
 }
 #
