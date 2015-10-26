@@ -5,5 +5,5 @@
 deployTarget=/var/www/dundee
 cp -f *.csv $deployTarget/csvBCM/
 cp -f *.html *.css $deployTarget/htmlBCM/
-#cp -f index.html *.css $deployTarget/
+cp -f index.html *.css $deployTarget/
 
