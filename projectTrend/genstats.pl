@@ -96,13 +96,13 @@ foreach(@pri){
 	$pri =~ s/,/ & /g; # pretty print priority
 	print "team,$ppteam,priority,$pri\n";
 	print 'week,',join(',',@wk),"\n";
-	print 'unresolved (start of week),',join(',',@unresStart),"\n";
+#	print 'unresolved (start of week),',join(',',@unresStart),"\n";
 	map{print $_,$inStr{$_},"\n"}@inflowCat;
 	print 'inflow,',join(',',@inflow),"\n";
 	map{print $_,$outStr{$_},"\n"}@outflowCat;
 	print 'outflow,',join(',',@outflow),"\n";
-	print 'unresolved (end of week),',join(',',@unresEnd),"\n";
-	print 'cumulative defects raised,',join(',',@cumul),"\n";
+#	print 'unresolved (end of week),',join(',',@unresEnd),"\n";
+#	print 'cumulative defects raised,',join(',',@cumul),"\n";
 	print "\n";
 }
 exit 0;
