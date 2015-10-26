@@ -4,7 +4,7 @@
 #
 IssueVersion=Dundee
 ExcludeVersion="$IssueVersion Outgoing"
-startDate=2014-11-03
+startDate=2015-06-15
 teams="xs-ring0 xs-ring3 xs-datapath xs-storage xs-gui xs-perf xs-windows xs-partner xs-nanjing xs-ns"
 allteam=`echo $teams | sed 's/ /,/g'`
 #
