@@ -22,7 +22,7 @@ report=$(team).report.csv
 params=--field-separator="," --no-align --tuples-only 
 params+= --variable=TEAM="$(call qw,$(team))" --variable=PROJECTS="'CA'"
 params+= --variable=RELIN="$(IssueVersion)" --variable=RELEXCL="$(ExcludeVersion)"
-params+= --variable=STATUS="'Resolved','Closed'" --variable=STARTDATE="'$(startDate)'"
+params+= --variable=STATUS="'Resolved','Closed','Done'" --variable=STARTDATE="'$(startDate)'"
 #autogen vars
 startWk:=$(shell date --date="$(startDate)" +"%ywk%V")
 htmlreport=$(subst csv,html,$(report))
