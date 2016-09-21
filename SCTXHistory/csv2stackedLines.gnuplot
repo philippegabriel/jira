@@ -8,8 +8,11 @@ set xtics  norangelimit font ",10"
 set xrange [xmin:xmax]
 set grid
 set output outfile
-plot	infile	using 1:($3+$4+$5+$6+$7+$8+$9+$10+$11):xticlabels(2) with filledcurve y1=0 title columnhead linecolor rgb 'red',\
-		infile	using 1:($3+$4+$5+$6+$7+$8+$9+$10):xticlabels(2) with filledcurve y1=0 title columnhead linecolor rgb 'dark-red',\
+plot	infile	using 1:($3+$4+$5+$6+$7+$8+$9+$10+$11+$12+$13+$14):xticlabels(2) with filledcurve y1=0 title columnhead linecolor rgb 'red',\
+		infile	using 1:($3+$4+$5+$6+$7+$8+$9+$10+$11+$12+$13):xticlabels(2) with filledcurve y1=0 title columnhead linecolor rgb 'dark-red',\
+		infile	using 1:($3+$4+$5+$6+$7+$8+$9+$10+$11+$12):xticlabels(2) with filledcurve y1=0 title columnhead linecolor rgb 'orange',\
+		infile	using 1:($3+$4+$5+$6+$7+$8+$9+$10+$11):xticlabels(2) with filledcurve y1=0 title columnhead linecolor rgb 'dark-orange',\
+		infile	using 1:($3+$4+$5+$6+$7+$8+$9+$10):xticlabels(2) with filledcurve y1=0 title columnhead linecolor rgb 'yellow',\
 		infile	using 1:($3+$4+$5+$6+$7+$8+$9):xticlabels(2) with filledcurve y1=0 title columnhead linecolor rgb 'salmon',\
 		infile	using 1:($3+$4+$5+$6+$7+$8):xticlabels(2) with filledcurve y1=0 title columnhead linecolor rgb 'gold',\
 		infile	using 1:($3+$4+$5+$6+$7):xticlabels(2) with filledcurve y1=0 title columnhead linecolor rgb 'forest-green',\

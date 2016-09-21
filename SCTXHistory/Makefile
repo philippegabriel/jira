@@ -7,7 +7,7 @@
 .PHONY: login jiraquery clean reallyclean check test
 include ../jira.mk
 ####################autogen variables#######################################
-deployTarget=/local/scratch/jiraanalysis
+deployTarget=/var/www/sqlstats
 jiratargets=SCTXbyDateAndRelease.csv SCTXSumByMonth.csv
 gnuplottargets=SCTX.byQuarter.png
 gnuplottargets+=SCTX.byMonth.png
@@ -27,9 +27,9 @@ SCTX.byQuarter.csv: SCTX.byMonth.csv
 
 #to update the graph up to the latest date, change the xmax label below
 %.byQuarter.png: %.byQuarter.csv
-	gnuplot -e "title='XenServer LCM Quarterly';outfile='$@';infile='$<';xmin='2';xmax='28';ylabel='# issues';xlabel='Quarter'"  csv2stackedLines.gnuplot
+	gnuplot -e "title='XenServer LCM Quarterly';outfile='$@';infile='$<';xmin='2';xmax='35';ylabel='# issues';xlabel='Quarter'"  csv2stackedLines.gnuplot
 %.byMonth.png: %.byMonth.csv
-	gnuplot -e "title='XenServer LCM Monthly';outfile='$@';infile='$<';xmin='5';xmax='84';ylabel='# issues';xlabel='Month'"  csv2stackedLines.gnuplot
+	gnuplot -e "title='XenServer LCM Monthly';outfile='$@';infile='$<';xmin='5';xmax='105';ylabel='# issues';xlabel='Month'"  csv2stackedLines.gnuplot
 %.thumb.png: %.png
 	convert $< -thumbnail x200 $@
 login:
@@ -40,6 +40,7 @@ reallyclean: clean
 	rm -f $(jiratargets)
 ################testing######################################################
 deploy:
+	cp index.* $(deployTarget)/
 	cp *.csv $(deployTarget)/csv/
 	cp *.png $(deployTarget)/png/
 	cp *.thumb.png $(deployTarget)/thumb/
