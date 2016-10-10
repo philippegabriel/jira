@@ -9,6 +9,7 @@ inclfile:=jira.mk
 #include file is parent dir (testing), or same dir (deployed)
 inclpath=$(if $(shell test -e ./$(inclfile) && echo ok),./,../)
 include $(inclpath)$(inclfile)
+config:=$(inclpath).config
 ##########################customise this section###############################################
 #start date: yyyy-mm-dd 
 startdate:=2014-06-09
@@ -24,7 +25,7 @@ r3=akshayr,jonathanlu,johnel,ravip,robho,simonbe,thomassa,euanh,philippeg,\#ring
 #win=bench,owensm,pauldu 
 names=$(r3)
 #target dir to host the web service
-deployTarget:=/local/scratch/jirasql
+deployTarget:=/var/www/jirasql/
 ########################end of custom section##################################################
 ########################autogen vars###########################################################
 #create a no space filename
@@ -55,9 +56,11 @@ clean:
 reallyclean:
 	rm -f *.csv
 deploy:
-	cp -f * $(deployTarget)
+	cp -f Makefile query.* $(deployTarget)
 	cp -f $(inclpath)$(inclfile) $(deployTarget)
-
+	cp -f $(config) $(deployTarget)
+test:
+	echo $(config)
 
 
 
