@@ -2,9 +2,9 @@
 #
 # Exec SQL queries for each teams
 #
-IssueVersion=Dundee
+IssueVersion=Ely
 ExcludeVersion="$IssueVersion Outgoing"
-startDate=2015-11-26
+startDate=2016-08-01
 teams="xs-ring0 xs-ring3 xs-datapath xs-gui xs-perf xs-nanjing"
 allteam=`echo $teams | sed 's/ /,/g'`
 #

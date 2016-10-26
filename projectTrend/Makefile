@@ -55,17 +55,17 @@ $(team).outflow.csv: $(outflowCSV)
 
 $(team).report.csv: $(team).inflow.csv $(team).outflow.csv
 	@echo "Generating report $@..."
-	date "+Report generated %d %b %Y %R %ywk%V"	>  $@
+	date "+Report generated,%d %b %Y %R %ywk%V"	>  $@
 	@echo 'team,$(team)'							>>  $@
 	@echo 'release,$(IssueVersion)'				>>  $@
-	@echo 'priority: BCM'					>>  $@
+	@echo 'priority,BCM'					>>  $@
 	@echo 											>>  $@
 	@echo 'C+ Created,R- Issue Resolved'			>>  $@
 	@echo 'V+ Version set to project,V- Issue set to outgoing'	>>  $@
 	@echo 'P+ Priority promoted,P- Priority demoted'		>>  $@
 	@echo 'T+ Team affected,T- Team not affected'		>>  $@
 	@echo 'O+ Issue Reopened',						>>  $@
-	@echo '__________________,______________________'>>  $@
+	@echo ' , '>>  $@
 	@cat $^ | sort -r >>  $@
 $(team).trend.csv: $(report)
 	./genstats.pl --startweek $(startWk) --team $(team) > $@
